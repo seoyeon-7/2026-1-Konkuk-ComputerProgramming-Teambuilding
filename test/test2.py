@@ -34,11 +34,20 @@ COLORS = {
     "열쇠": (255, 215, 0), "HUD_BG": (30, 30, 45),
 }
 
+#윈도우
+# try:
+#     FONT_BIG   = pygame.font.SysFont("AppleGothic", 42, bold=True)
+#     FONT_MID   = pygame.font.SysFont("AppleGothic", 22, bold=True)
+#     FONT_SMALL = pygame.font.SysFont("AppleGothic", 15)
+#     FONT_TINY  = pygame.font.SysFont("AppleGothic", 13)
+
+#맥북
 try:
     FONT_BIG   = pygame.font.SysFont("AppleGothic", 42, bold=True)
     FONT_MID   = pygame.font.SysFont("AppleGothic", 22, bold=True)
     FONT_SMALL = pygame.font.SysFont("AppleGothic", 15)
     FONT_TINY  = pygame.font.SysFont("AppleGothic", 13)
+
 except:
     FONT_BIG   = pygame.font.Font(None, 54)
     FONT_MID   = pygame.font.Font(None, 30)

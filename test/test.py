@@ -17,10 +17,17 @@ COLORS = {
 
 SHAPES = ["네모", "동그라미", "세모", "역세모", "다이아", "오각형", "하트", "별", "육각형", "십자가"]
 
+# 윈도우
+# try:
+#     FONT_BIG = pygame.font.SysFont("malgungothic", 36, bold=True)
+#     FONT_MID = pygame.font.SysFont("malgungothic", 20, bold=True)
+#     FONT_SMALL = pygame.font.SysFont("malgungothic", 14)
+
+#맥북
 try:
-    FONT_BIG = pygame.font.SysFont("malgungothic", 36, bold=True)
-    FONT_MID = pygame.font.SysFont("malgungothic", 20, bold=True)
-    FONT_SMALL = pygame.font.SysFont("malgungothic", 14)
+     FONT_BIG = pygame.font.SysFont("AppleGothic", 36, bold=True)
+     FONT_MID = pygame.font.SysFont("AppleGothic", 20, bold=True)
+     FONT_SMALL = pygame.font.SysFont("AppleGothic", 14)
 except:
     FONT_BIG = pygame.font.Font(None, 48)
     FONT_MID = pygame.font.Font(None, 28)
