@@ -1,3 +1,13 @@
+import sys
+
+print("python =", sys.executable)
+
+try:
+    import pygame
+    print("pygame OK", pygame.version.ver)
+except Exception as e:
+    print("pygame ERROR:", e)
+
 import pygame
 import sys
 import random
@@ -25,10 +35,10 @@ COLORS = {
 }
 
 try:
-    FONT_BIG   = pygame.font.SysFont("malgungothic", 42, bold=True)
-    FONT_MID   = pygame.font.SysFont("malgungothic", 22, bold=True)
-    FONT_SMALL = pygame.font.SysFont("malgungothic", 15)
-    FONT_TINY  = pygame.font.SysFont("malgungothic", 13)
+    FONT_BIG   = pygame.font.SysFont("AppleGothic", 42, bold=True)
+    FONT_MID   = pygame.font.SysFont("AppleGothic", 22, bold=True)
+    FONT_SMALL = pygame.font.SysFont("AppleGothic", 15)
+    FONT_TINY  = pygame.font.SysFont("AppleGothic", 13)
 except:
     FONT_BIG   = pygame.font.Font(None, 54)
     FONT_MID   = pygame.font.Font(None, 30)
@@ -223,22 +233,41 @@ class Monster:
         self.path_timer = 0
 
     def _bfs(self, maze, tile, tx, ty):
-        sc = int(self.x // tile); sr = int(self.y // tile)
-        tc = int(tx // tile);    tr = int(ty // tile)
-        if maze[sr][sc] == 1: sc = max(1, sc); sr = max(1, sr)
+        sc = int(self.x // tile)
+        sr = int(self.y // tile)
+
+        sc = max(0, min(sc, len(maze[0]) - 1))
+        sr = max(0, min(sr, len(maze) - 1))
+
+        tc = int(tx // tile)
+        tr = int(ty // tile)
+
+        tc = max(0, min(tc, len(maze[0]) - 1))
+        tr = max(0, min(tr, len(maze) - 1))
+
+        if maze[sr][sc] == 1:
+            return []
+
         visited = {(sr, sc)}
         q = deque([(sr, sc, [])])
-        while q:
-            r, c, path = q.popleft()
-            if (r, c) == (tr, tc):
-                return path
-            for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]:
-                nr, nc = r+dr, c+dc
-                if 0 <= nr < len(maze) and 0 <= nc < len(maze[0]) \
-                        and maze[nr][nc] == 0 and (nr, nc) not in visited:
-                    visited.add((nr, nc))
-                    q.append((nr, nc, path + [(nr, nc)]))
-        return []
+
+    def _safe_random_pos(self):
+        while True:
+            x, y = self._random_floor_pos()
+
+            safe = True
+            for m in self.monsters:
+                if not m.alive:
+                    continue
+
+                dist = math.hypot(x - m.x, y - m.y)
+
+                if dist < 80:
+                    safe = False
+                    break
+
+            if safe:
+                return x, y
 
     def update(self, maze, tile, px, py):
         if not self.alive: return
@@ -414,7 +443,7 @@ class GameScene:
                     if p.take_damage():
                         self._show_msg("💔 생명 -1!")
                 elif trap.kind == "시야제한":
-                    p.vision_expand = -120
+                    p.vision_expand -= 120
                     self._show_msg("🌑 시야 제한!")
                 elif trap.kind == "랜덤이동":
                     p.x, p.y = self._random_floor_pos()
@@ -434,7 +463,7 @@ class GameScene:
                     p.speed_boost = 240
                     self._show_msg("💨 속도 증가!")
                 elif item.kind == "시야확대":
-                    p.vision_expand = 120
+                    p.vision_expand += 120
                     self._show_msg("👁 시야 확대!")
                 elif item.kind == "적일시정지":
                     for m in self.monsters:
@@ -595,7 +624,7 @@ class GameScene:
         if self.msg_timer > 0:
             alpha = min(255, self.msg_timer * 4)
             ms = FONT_MID.render(self.msg, True, COLORS["노랑"])
-            mr = ms.get_rect(center=(WIDTH//2, HEIGHT//2 - 60))
+            mr = ms.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 60))
             surface.blit(ms, mr)
 
         # 결과 오버레이
