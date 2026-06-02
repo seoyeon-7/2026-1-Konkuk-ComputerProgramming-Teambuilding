@@ -6,7 +6,7 @@ import json
 import os
 from collections import deque
 
-# 초기화 및 화면 크기 설정
+# 초기화 및 화면 크기 설정git pull origin main
 pygame.init()
 WIDTH, HEIGHT = 700, 700
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -39,10 +39,10 @@ COLORS = {
 
 #맥북
 try:
-    FONT_BIG = pygame.font.SysFont("AppleGothic", 42, bold=True)
-    FONT_MID = pygame.font.SysFont("AppleGothic", 22, bold=True)
-    FONT_SMALL = pygame.font.SysFont("AppleGothic", 15, bold=True)
-    FONT_TINY = pygame.font.SysFont("AppleGothic", 13, bold=True)
+    FONT_BIG = pygame.font.SysFont("malgungothic", 42, bold=True)
+    FONT_MID = pygame.font.SysFont("malgungothic", 22, bold=True)
+    FONT_SMALL = pygame.font.SysFont("malgungothic", 15, bold=True)
+    FONT_TINY = pygame.font.SysFont("malgungothic", 13, bold=True)
 
 except:
     FONT_BIG = pygame.font.Font(None, 54)
@@ -165,6 +165,67 @@ def draw_shape(surface, shape, color, cx, cy, r):
         pygame.draw.polygon(surface, color, pts)
         pygame.draw.polygon(surface, outline, pts, 2)
 
+
+def draw_key(surface, cx, cy, scale=1.0):
+    """열쇠 오브젝트 전용 그리기 함수: 아이템 다이아와 헷갈리지 않도록 실제 열쇠 모양으로 표시"""
+    cx, cy = int(cx), int(cy)
+    color = COLORS["열쇠"]
+    outline = COLORS["블랙"]
+
+    bow_r = max(3, int(6 * scale))
+    shaft_len = max(10, int(18 * scale))
+    shaft_h = max(3, int(5 * scale))
+    tooth_w = max(3, int(5 * scale))
+    tooth_h = max(3, int(6 * scale))
+
+    bow_x = cx - int(8 * scale)
+    shaft_x = bow_x + bow_r
+    shaft_y = cy - shaft_h // 2
+
+    # 손잡이 고리
+    pygame.draw.circle(surface, color, (bow_x, cy), bow_r)
+    pygame.draw.circle(surface, outline, (bow_x, cy), bow_r, max(1, int(2 * scale)))
+    pygame.draw.circle(surface, COLORS["바닥"], (bow_x, cy), max(2, bow_r // 2))
+    pygame.draw.circle(surface, outline, (bow_x, cy), max(2, bow_r // 2), 1)
+
+    # 열쇠 몸통
+    body_rect = pygame.Rect(shaft_x, shaft_y, shaft_len, shaft_h)
+    pygame.draw.rect(surface, color, body_rect)
+    pygame.draw.rect(surface, outline, body_rect, 1)
+
+    # 열쇠 이빨
+    tooth1 = pygame.Rect(shaft_x + shaft_len - tooth_w, cy, tooth_w, tooth_h)
+    tooth2 = pygame.Rect(shaft_x + shaft_len - tooth_w * 2, cy, tooth_w, max(2, int(4 * scale)))
+    pygame.draw.rect(surface, color, tooth1)
+    pygame.draw.rect(surface, outline, tooth1, 1)
+    pygame.draw.rect(surface, color, tooth2)
+    pygame.draw.rect(surface, outline, tooth2, 1)
+
+def draw_long_item_diamond(surface, cx, cy, r):
+    """일반 아이템 전용 그리기 함수: 상하로 긴 다이아 + 노랑/핑크 계열"""
+    cx, cy, r = int(cx), int(cy), float(r)
+    outer_color = (255, 235, 59)  
+    inner_color = (255, 248, 180) 
+    outline = COLORS["블랙"]
+
+    outer_pts = [
+        (cx, int(cy - r * 1.45)),
+        (int(cx + r * 0.72), cy),
+        (cx, int(cy + r * 1.45)),
+        (int(cx - r * 0.72), cy)
+    ]
+    inner_pts = [
+        (cx, int(cy - r * 0.85)),
+        (int(cx + r * 0.42), cy),
+        (cx, int(cy + r * 0.85)),
+        (int(cx - r * 0.42), cy)
+    ]
+
+    pygame.draw.polygon(surface, outer_color, outer_pts)
+    pygame.draw.polygon(surface, outline, outer_pts, 2)
+    pygame.draw.polygon(surface, inner_color, inner_pts)
+    pygame.draw.polygon(surface, outline, inner_pts, 1)
+
 # ─────────────────────────────────────────
 # 버튼 클래스
 # ─────────────────────────────────────────
@@ -237,7 +298,8 @@ class Player:
         self.vision_expand = 0
         self.speed_boost = 0
         self.hit_blindness = 0
-        self.size = 12.0
+        self.reverse_timer = 0
+        self.size = 11.0
 
     def move(self, dx, dy, maze, tile):
         spd = self.speed
@@ -353,8 +415,8 @@ class Monster:
 # ─────────────────────────────────────────
 # 아이템 / 함정 클래스
 # ─────────────────────────────────────────
-ITEM_TYPES = ["적처치", "속도증가", "시야확대", "적일시정지", "체력회복"]
-TRAP_TYPES = ["이동감소", "생명-1", "시야제한", "랜덤이동"]
+ITEM_TYPES = ["적처치", "속도증가", "시야확대", "적일시정지", "체력회복", "시간왜곡"]
+TRAP_TYPES = ["이동감소", "생명-1", "시야제한", "랜덤이동", "상하좌우반전"]
 
 class MapObject:
     def __init__(self, x, y, kind, is_trap=False):
@@ -379,7 +441,7 @@ class MapObject:
             if self.kind == "체력회복":
                 draw_shape(surface, "하트", (255, 100, 150), tx, ty, pulse_r - 2)
             else:
-                draw_shape(surface, "다이아", (241, 196, 15), tx, ty, pulse_r - 2)
+                draw_long_item_diamond(surface, tx, ty, pulse_r - 2)
 
 # ─────────────────────────────────────────
 # 인게임 게임 씬 (GameScene)
@@ -425,6 +487,7 @@ class GameScene:
         self.result = None
         self.flash_timer = 0
         self.shake_intensity = 0
+        self.time_warp_timer = 0
 
     def _random_floor_pos(self, exclude_start=False):
         while True:
@@ -503,6 +566,9 @@ class GameScene:
                         elif obj.kind == "랜덤이동":
                             p.x, p.y = self._random_floor_pos()
                             self._show_msg("🌀 공간 왜곡! 무작위 텔레포트")
+                        elif obj.kind == "상하좌우반전":
+                            p.reverse_timer = 300
+                            self._show_msg("↔️ 상하좌우 반전! 5초 동안 방향키가 뒤집힙니다")
                 else:
                     if obj.kind == "체력회복":
                         p.hp = min(3, p.hp + 1)
@@ -519,6 +585,9 @@ class GameScene:
                     elif obj.kind == "적일시정지":
                         for m in self.monsters: m.stun = 180
                         self._show_msg("⏸ 시공간 정지! 적 행동 불능")
+                    elif obj.kind == "시간왜곡":
+                        self.time_warp_timer = 180
+                        self._show_msg("⏳ 시간 왜곡! 3초 동안 타이머가 느려집니다")
 
         if self.need_key and not p.has_key:
             kx, ky = self.key_pos
@@ -553,6 +622,13 @@ class GameScene:
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]: dx = 1
         if keys[pygame.K_UP] or keys[pygame.K_w]: dy = -1
         if keys[pygame.K_DOWN] or keys[pygame.K_s]: dy = 1
+
+        # 상하좌우반전 함정 효과: 5초 동안 모든 방향 입력을 반대로 적용
+        if self.player.reverse_timer > 0:
+            dx *= -1
+            dy *= -1
+            self.player.reverse_timer -= 1
+
         if dx != 0 and dy != 0: dx *= 0.707; dy *= 0.707
 
         self.player.move(dx, dy, self.maze, self.TILE)
@@ -560,7 +636,15 @@ class GameScene:
             m.update(self.maze, self.TILE, self.player.x, self.player.y)
 
         self.frame_count += 1
-        if self.frame_count % 60 == 0:
+
+        # 시간왜곡 아이템 효과: 3초 동안 화면 타이머가 0.5배 속도로 감소
+        if self.time_warp_timer > 0:
+            self.time_warp_timer -= 1
+            time_tick = 120
+        else:
+            time_tick = 60
+
+        if self.frame_count % time_tick == 0:
             self.time_left -= 1
             if self.time_left <= 0: self.result = "LOSE"
 
@@ -593,7 +677,7 @@ class GameScene:
         if self.need_key and not self.player.has_key:
             kx, ky = self.key_pos
             if -T < kx - ox < PLAY_ZONE_W and 45 - T < ky - oy < HEIGHT:
-                draw_shape(surface, "다이아", COLORS["열쇠"], kx - ox, ky - oy, 11)
+                draw_key(surface, kx - ox, ky - oy, 1.0)
 
         for obj in self.objects:
             if -T < obj.x - ox < PLAY_ZONE_W and 45 - T < obj.y - oy < HEIGHT:
@@ -624,7 +708,12 @@ class GameScene:
         px_screen, py_screen = self.player.x - ox, self.player.y - oy
 
         fog = pygame.Surface((PLAY_ZONE_W, HEIGHT - 45), pygame.SRCALPHA)
-        fog_alpha = 50 if self.difficulty == "Easy" else 100
+        if self.difficulty == "Easy":
+            fog_alpha = 100
+        elif self.difficulty == "Normal":
+            fog_alpha = 150
+        else:  # Hard
+            fog_alpha = 190
         fog.fill((10, 15, 25, fog_alpha))
 
         pygame.draw.circle(fog, (0, 0, 0, 0), (int(px_screen), int(py_screen - 45)), int(vision))
@@ -662,7 +751,7 @@ class GameScene:
         surface.blit(FONT_TINY.render("체력 회복", True, COLORS["화이트"]), (panel_x + 36, 98))
 
         pygame.draw.circle(surface, COLORS["아이템_원"], (panel_x + 20, 130), 7, 1)
-        draw_shape(surface, "다이아", (241, 196, 15), panel_x + 20, 130, 5)
+        draw_long_item_diamond(surface, panel_x + 20, 130, 5)
         surface.blit(FONT_TINY.render("스페셜 이펙트", True, COLORS["화이트"]), (panel_x + 36, 123))
 
         pygame.draw.circle(surface, COLORS["함정_원"], (panel_x + 20, 175), 7, 2)
@@ -674,7 +763,7 @@ class GameScene:
         surface.blit(FONT_TINY.render("디버프/워프", True, COLORS["연그레이"]), (panel_x + 36, 193))
 
         if self.need_key:
-            draw_shape(surface, "다이아", COLORS["열쇠"], panel_x + 20, 245, 7)
+            draw_key(surface, panel_x + 20, 245, 0.65)
             surface.blit(FONT_TINY.render("데이터 키(필수)", True, COLORS["열쇠"]), (panel_x + 36, 238))
 
         if self.msg_timer > 0:
@@ -911,44 +1000,66 @@ class GameController:
                 surf = FONT_SMALL.render(text, True, color)
                 surface.blit(surf, (80, 140 + i * 22))
 
-            # 왼쪽 설명
+            # 설명 박스 내부를 2단 레이아웃으로 정리
+            # 왼쪽: 목표/조작/적, 오른쪽: 아이템/함정
+            pygame.draw.line(surface, (80, 80, 100), (80, 205), (620, 205), 1)
+            pygame.draw.line(surface, (80, 80, 100), (385, 220), (385, 520), 1)
+
+            left_x = 90
+            right_x = 420
+
             left_lines = [
-                "게임 목표",
-                "- 미로 탐험",
-                "- 열쇠 획득 후 탈출",
-                "",
-                "조작법",
-                "- WASD / 방향키 이동",
-                "",
-                "적",
-                "- 충돌 시 체력 감소"
+                ("게임 목표", COLORS["민트"]),
+                ("- 미로 탐험", COLORS["화이트"]),
+                ("- 열쇠 획득 후 탈출", COLORS["화이트"]),
+                ("", COLORS["화이트"]),
+                ("조작법", COLORS["민트"]),
+                ("- WASD / 방향키 이동", COLORS["화이트"]),
+                ("", COLORS["화이트"]),
+                ("적", COLORS["민트"]),
+                ("- 충돌 시 체력 감소", COLORS["화이트"])
             ]
 
-            for i, text in enumerate(left_lines):
-                color = COLORS["민트"] if text in ["게임 목표", "조작법", "적"] else COLORS["화이트"]
+            for i, (text, color) in enumerate(left_lines):
+                if text == "":
+                    continue
                 surf = FONT_SMALL.render(text, True, color)
-                surface.blit(surf, (80, 220 + i * 26))
+                surface.blit(surf, (left_x, 225 + i * 28))
 
-            # 오른쪽 설명
-            right_lines = [
+            # 오른쪽 설명은 아이템과 함정을 작은 카드처럼 분리해서 배치
+            pygame.draw.rect(surface, (42, 42, 58), (405, 215, 210, 155), border_radius=10)
+            pygame.draw.rect(surface, (70, 90, 105), (405, 215, 210, 155), 1, border_radius=10)
+            pygame.draw.rect(surface, (42, 42, 58), (405, 385, 210, 135), border_radius=10)
+            pygame.draw.rect(surface, (70, 90, 105), (405, 385, 210, 135), 1, border_radius=10)
+
+            item_lines = [
                 "아이템",
                 "- 체력 회복",
                 "- 적 제거",
                 "- 속도 증가",
                 "- 시야 확대",
                 "- 적 정지",
-                "",
+                "- 시간 왜곡"
+            ]
+
+            trap_lines = [
                 "함정",
                 "- 생명 감소",
                 "- 이동 속도 감소",
                 "- 시야 제한",
-                "- 랜덤 이동"
+                "- 랜덤 이동",
+                "- 상하좌우 반전"
             ]
 
-            for i, text in enumerate(right_lines):
-                color = COLORS["민트"] if text in ["아이템", "함정"] else COLORS["화이트"]
+            for i, text in enumerate(item_lines):
+                color = COLORS["민트"] if i == 0 else COLORS["화이트"]
                 surf = FONT_SMALL.render(text, True, color)
-                surface.blit(surf, (360, 220 + i * 26))
+                surface.blit(surf, (right_x, 225 + i * 21))
+
+            for i, text in enumerate(trap_lines):
+                color = COLORS["민트"] if i == 0 else COLORS["화이트"]
+                surf = FONT_SMALL.render(text, True, color)
+                surface.blit(surf, (right_x, 395 + i * 21))
 
         if self.state == "START":
             txt = FONT_BIG.render("< 도망쳐! 네모 미로 >", True, COLORS["노랑"])
