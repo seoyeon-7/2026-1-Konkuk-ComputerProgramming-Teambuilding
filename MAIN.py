@@ -6,7 +6,6 @@ import json
 import os
 from collections import deque
 
-# 초기화 및 화면 크기 설정
 pygame.init()
 WIDTH, HEIGHT = 700, 700
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -15,9 +14,6 @@ clock = pygame.time.Clock()
 
 SAVE_FILE = "maze_save.json"
 
-# ─────────────────────────────────────────
-# 색상 / 폰트
-# ─────────────────────────────────────────
 COLORS = {
     "빨강": (220, 50, 50), "주황": (255, 165, 0), "노랑": (255, 220, 0),
     "초록": (34, 160, 34), "파랑": (30, 80, 220), "남색": (0, 0, 128),
@@ -30,14 +26,6 @@ COLORS = {
     "아이템_원": (52, 152, 219), "함정_원": (231, 76, 60)
 }
 
-# 윈도우
-# try:
-#     FONT_BIG = pygame.font.SysFont("malgungothic", 42, bold=True)
-#     FONT_MID = pygame.font.SysFont("malgungothic", 22, bold=True)
-#     FONT_SMALL = pygame.font.SysFont("malgungothic", 15, bold=True)
-#     FONT_TINY = pygame.font.SysFont("malgungothic", 13, bold=True)
-
-#맥북
 try:
     FONT_BIG = pygame.font.SysFont("AppleGothic", 42, bold=True)
     FONT_MID = pygame.font.SysFont("AppleGothic", 22, bold=True)
@@ -52,7 +40,6 @@ except:
 
 SHAPES = ["네모", "동그라미", "세모", "역세모", "다이아", "오각형", "하트", "별", "육각형", "십자가"]
 
-# 난이도별 세팅 (몬스터 수: 이지 1, 보통 2, 하드 3 고정)
 DIFFICULTY = {
     "Easy": {
         "monsters": 1, "time": 120,
@@ -73,9 +60,6 @@ DIFFICULTY = {
     },
 }
 
-# ─────────────────────────────────────────
-# 세이브 시스템
-# ─────────────────────────────────────────
 def load_game_data():
     loaded_data = None
     if os.path.exists(SAVE_FILE):
@@ -110,9 +94,6 @@ def save_game_data(data):
     with open(SAVE_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-# ─────────────────────────────────────────
-# 도형 그리기 함수
-# ─────────────────────────────────────────
 def draw_shape(surface, shape, color, cx, cy, r):
     cx, cy, r = int(cx), int(cy), int(r)
     outline = COLORS["블랙"]
@@ -182,18 +163,15 @@ def draw_key(surface, cx, cy, scale=1.0):
     shaft_x = bow_x + bow_r
     shaft_y = cy - shaft_h // 2
 
-    # 손잡이 고리
     pygame.draw.circle(surface, color, (bow_x, cy), bow_r)
     pygame.draw.circle(surface, outline, (bow_x, cy), bow_r, max(1, int(2 * scale)))
     pygame.draw.circle(surface, COLORS["바닥"], (bow_x, cy), max(2, bow_r // 2))
     pygame.draw.circle(surface, outline, (bow_x, cy), max(2, bow_r // 2), 1)
 
-    # 열쇠 몸통
     body_rect = pygame.Rect(shaft_x, shaft_y, shaft_len, shaft_h)
     pygame.draw.rect(surface, color, body_rect)
     pygame.draw.rect(surface, outline, body_rect, 1)
 
-    # 열쇠 이빨
     tooth1 = pygame.Rect(shaft_x + shaft_len - tooth_w, cy, tooth_w, tooth_h)
     tooth2 = pygame.Rect(shaft_x + shaft_len - tooth_w * 2, cy, tooth_w, max(2, int(4 * scale)))
     pygame.draw.rect(surface, color, tooth1)
@@ -226,9 +204,6 @@ def draw_long_item_diamond(surface, cx, cy, r):
     pygame.draw.polygon(surface, inner_color, inner_pts)
     pygame.draw.polygon(surface, outline, inner_pts, 1)
 
-# ─────────────────────────────────────────
-# 버튼 클래스
-# ─────────────────────────────────────────
 class Button:
     def __init__(self, x, y, w, h, text, bg, fg, cb, enabled=True):
         self.rect = pygame.Rect(x, y, w, h)
@@ -260,9 +235,6 @@ class Button:
             if self.rect.collidepoint(event.pos):
                 self.cb()
 
-# ─────────────────────────────────────────
-# 미로 생성
-# ─────────────────────────────────────────
 def generate_maze(cols, rows):
     grid = [[1] * cols for _ in range(rows)]
     def carve(cx, cy):
@@ -282,9 +254,6 @@ def generate_maze(cols, rows):
         grid[rows-2][cols-3] = 0
     return grid
 
-# ─────────────────────────────────────────
-# 플레이어 클래스
-# ─────────────────────────────────────────
 class Player:
     BASE_SPEED = 3.8
     def __init__(self, x, y, shape, color):
@@ -353,9 +322,6 @@ class Player:
             return
         draw_shape(surface, self.shape, self.color, self.x - ox, self.y - oy, self.size)
 
-# ─────────────────────────────────────────
-# 몬스터 클래스
-# ─────────────────────────────────────────
 class Monster:
     def __init__(self, x, y, shape="동그라미", speed=1.5, is_chaser=False):
         self.x, self.y = float(x), float(y)
@@ -417,9 +383,6 @@ class Monster:
         color = (155, 89, 182) if self.is_chaser else (231, 76, 60)
         draw_shape(surface, self.shape, color, self.x - ox, self.y - oy, self.size)
 
-# ─────────────────────────────────────────
-# 총알 클래스
-# ─────────────────────────────────────────
 class Bullet:
     def __init__(self, x, y, dx, dy):
         self.x = float(x)
@@ -448,9 +411,6 @@ class Bullet:
             self.radius
         )
 
-# ─────────────────────────────────────────
-# 아이템 / 함정 클래스
-# ─────────────────────────────────────────
 ITEM_TYPES = ["적처치", "속도증가", "시야확대", "적일시정지", "체력회복", "시간왜곡"]
 TRAP_TYPES = ["이동감소", "생명-1", "시야제한", "랜덤이동", "상하좌우반전"]
 
@@ -479,9 +439,6 @@ class MapObject:
             else:
                 draw_long_item_diamond(surface, tx, ty, pulse_r - 2)
 
-# ─────────────────────────────────────────
-# 인게임 게임 씬 (GameScene)
-# ─────────────────────────────────────────
 class GameScene:
     TILE = 26
 
@@ -506,7 +463,6 @@ class GameScene:
         sy = 1 * self.TILE + self.TILE // 2
         self.player = Player(sx, sy, shape, color)
 
-        # 몬스터 생성 수 수정: 난이도별 설정값 그대로 고정 (이지: 1, 보통: 2, 하드: 3)
         self.monsters = self._spawn_monsters(self.cfg["monsters"])
         self.objects = []
         self._place_items_traps()
@@ -544,7 +500,7 @@ class GameScene:
         m_speed = self.cfg["monster_speed"]
         for i in range(count):
             x, y = self._random_floor_pos(exclude_start=True)
-            is_chaser = (i % 3 == 0) and (self.difficulty != "Easy") # 이지는 추격 형태 비활성화
+            is_chaser = (i % 3 == 0) and (self.difficulty != "Easy")
             m = Monster(x, y, "동그라미" if not is_chaser else "육각형", speed=m_speed, is_chaser=is_chaser)
             monsters.append(m)
         return monsters
@@ -717,7 +673,6 @@ class GameScene:
         if keys[pygame.K_UP]: dy = -1
         if keys[pygame.K_DOWN]: dy = 1
 
-        # 상하좌우반전 함정 효과: 5초 동안 모든 방향 입력을 반대로 적용
         if self.player.reverse_timer > 0:
             dx *= -1
             dy *= -1
@@ -790,7 +745,6 @@ class GameScene:
 
                 self._show_msg("⚠️ 적 증원 감지!")
 
-        # 시간왜곡 아이템 효과: 3초 동안 화면 타이머가 0.5배 속도로 감소
         if self.time_warp_timer > 0:
             self.time_warp_timer -= 1
             time_tick = 120
@@ -846,7 +800,6 @@ class GameScene:
         if 45 - self.player.size < self.player.y - oy < HEIGHT:
             self.player.draw(surface, ox, oy)
 
-        # 전장 안개
         vision = self.base_vision
         if self.player.vision_expand > 0:
             vision += 70
@@ -880,7 +833,6 @@ class GameScene:
             flash.fill((231, 76, 60, 110))
             surface.blit(flash, (0, 45))
 
-        # 상단 HUD 바 (무조건 맨 위에 덮어 씌우기)
         pygame.draw.rect(surface, COLORS["HUD_BG"], (0, 0, PLAY_ZONE_W, 45))
         pygame.draw.line(surface, COLORS["그레이"], (0, 45), (PLAY_ZONE_W, 45), 2)
         for i in range(3):
@@ -895,7 +847,6 @@ class GameScene:
         info = FONT_SMALL.render(f"ST {self.stage} | {self.cfg['label']}", True, COLORS["연그레이"])
         surface.blit(info, info.get_rect(midright=(PLAY_ZONE_W - 15, 22)))
 
-        # 우측 고정 설명 패널
         panel_x = WIDTH - 160
         pygame.draw.rect(surface, COLORS["패널"], (panel_x, 0, 160, HEIGHT))
         pygame.draw.line(surface, COLORS["연그레이"], (panel_x, 0), (panel_x, HEIGHT), 2)
@@ -939,9 +890,6 @@ class GameScene:
             hint = FONT_MID.render("[ 아무 키나 누르면 정산 화면으로 ]", True, COLORS["화이트"])
             surface.blit(hint, hint.get_rect(center=(WIDTH//2, HEIGHT//2 + 40)))
 
-# ─────────────────────────────────────────
-# 통합 게임 매니저 컨트롤러 (GameController)
-# ─────────────────────────────────────────
 class GameController:
     def __init__(self):
         self.state = "START"
@@ -990,13 +938,11 @@ class GameController:
                 ),
             ],
             "CUSTOM": [
-                # 도형 선택
                 *[Button(60 + (i%5)*120, 200 + (i//5)*60, 100, 45, sh,
                          (70, 75, 90), COLORS["화이트"],
                          (lambda s: lambda: setattr(self, 'character_shape', s))(sh))
                   for i, sh in enumerate(SHAPES)],
 
-                # 색상 선택
                 *[Button(
                     60 + (i%5)*120,
                     360 + (i//5)*60,
@@ -1178,8 +1124,6 @@ class GameController:
                 surf = FONT_SMALL.render(text, True, color)
                 surface.blit(surf, (80, 140 + i * 22))
 
-            # 설명 박스 내부를 2단 레이아웃으로 정리
-            # 왼쪽: 목표/조작/적, 오른쪽: 아이템/함정
             pygame.draw.line(surface, (80, 80, 100), (80, 205), (620, 205), 1)
             pygame.draw.line(surface, (80, 80, 100), (385, 220), (385, 520), 1)
 
@@ -1204,7 +1148,6 @@ class GameController:
                 surf = FONT_SMALL.render(text, True, color)
                 surface.blit(surf, (left_x, 225 + i * 28))
 
-            # 오른쪽 설명은 아이템과 함정을 작은 카드처럼 분리해서 배치
             pygame.draw.rect(surface, (42, 42, 58), (405, 215, 210, 155), border_radius=10)
             pygame.draw.rect(surface, (70, 90, 105), (405, 215, 210, 155), 1, border_radius=10)
             pygame.draw.rect(surface, (42, 42, 58), (405, 385, 210, 135), border_radius=10)
@@ -1294,9 +1237,6 @@ class GameController:
         for btn in self.buttons.get(self.state, []):
             btn.draw(surface)
 
-# ─────────────────────────────────────────
-# 메인 루프 실행부
-# ─────────────────────────────────────────
 controller = GameController()
 
 running = True
