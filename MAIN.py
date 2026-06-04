@@ -6,7 +6,7 @@ import json
 import os
 from collections import deque
 
-# 초기화 및 화면 크기 설정git pull origin main
+# 초기화 및 화면 크기 설정
 pygame.init()
 WIDTH, HEIGHT = 700, 700
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -39,10 +39,10 @@ COLORS = {
 
 #맥북
 try:
-    FONT_BIG = pygame.font.SysFont("malgungothic", 42, bold=True)
-    FONT_MID = pygame.font.SysFont("malgungothic", 22, bold=True)
-    FONT_SMALL = pygame.font.SysFont("malgungothic", 15, bold=True)
-    FONT_TINY = pygame.font.SysFont("malgungothic", 13, bold=True)
+    FONT_BIG = pygame.font.SysFont("AppleGothic", 42, bold=True)
+    FONT_MID = pygame.font.SysFont("AppleGothic", 22, bold=True)
+    FONT_SMALL = pygame.font.SysFont("AppleGothic", 15, bold=True)
+    FONT_TINY = pygame.font.SysFont("AppleGothic", 13, bold=True)
 
 except:
     FONT_BIG = pygame.font.Font(None, 54)
@@ -300,9 +300,14 @@ class Player:
         self.hit_blindness = 0
         self.reverse_timer = 0
         self.size = 11.0
+        self.last_dx = 1
+        self.last_dy = 0
 
     def move(self, dx, dy, maze, tile):
         spd = self.speed
+        if dx != 0 or dy != 0:
+            self.last_dx = dx
+            self.last_dy = dy
         if self.slow_timer > 0:
             spd *= 0.5
             self.slow_timer -= 1
@@ -413,6 +418,37 @@ class Monster:
         draw_shape(surface, self.shape, color, self.x - ox, self.y - oy, self.size)
 
 # ─────────────────────────────────────────
+# 총알 클래스
+# ─────────────────────────────────────────
+class Bullet:
+    def __init__(self, x, y, dx, dy):
+        self.x = float(x)
+        self.y = float(y)
+
+        dist = math.hypot(dx, dy)
+        if dist == 0:
+            dist = 1
+
+        self.dx = dx / dist
+        self.dy = dy / dist
+
+        self.speed = 8
+        self.radius = 5
+        self.alive = True
+
+    def update(self):
+        self.x += self.dx * self.speed
+        self.y += self.dy * self.speed
+
+    def draw(self, surface, ox, oy):
+        pygame.draw.circle(
+            surface,
+            (255, 0, 0),
+            (int(self.x - ox), int(self.y - oy)),
+            self.radius
+        )
+
+# ─────────────────────────────────────────
 # 아이템 / 함정 클래스
 # ─────────────────────────────────────────
 ITEM_TYPES = ["적처치", "속도증가", "시야확대", "적일시정지", "체력회복", "시간왜곡"]
@@ -475,6 +511,8 @@ class GameScene:
         self.objects = []
         self._place_items_traps()
 
+        self.bullets = []
+
         self.need_key = stage >= 2
         self.key_pos = self._random_floor_pos(exclude_start=True)
         self.time_left = self.cfg["time"]
@@ -488,6 +526,10 @@ class GameScene:
         self.flash_timer = 0
         self.shake_intensity = 0
         self.time_warp_timer = 0
+
+        self.bullets = []
+        self.shoot_cooldown = 0
+        self.spawn_timer = 0
 
     def _random_floor_pos(self, exclude_start=False):
         while True:
@@ -506,6 +548,32 @@ class GameScene:
             m = Monster(x, y, "동그라미" if not is_chaser else "육각형", speed=m_speed, is_chaser=is_chaser)
             monsters.append(m)
         return monsters
+
+    def spawn_extra_monster(self):
+
+        x, y = self._random_floor_pos(exclude_start=True)
+
+        m = Monster(
+            x,
+            y,
+            "동그라미",
+            speed=self.cfg["monster_speed"],
+            is_chaser=False
+        )
+
+        self.monsters.append(m)
+
+    def shoot(self):
+        p = self.player
+
+        bullet = Bullet(
+            p.x,
+            p.y,
+            p.last_dx,
+            p.last_dy
+        )
+
+        self.bullets.append(bullet)
 
     def _place_items_traps(self):
         trap_r = self.cfg["trap_rate"]
@@ -615,13 +683,39 @@ class GameScene:
         self.msg = text
         self.msg_timer = 100
 
+    def shoot_direction(self, dx, dy):
+
+        print("shoot_direction 실행")
+
+        if self.shoot_cooldown > 0:
+            print("쿨타임 중")
+            return
+
+        self.shoot_cooldown = 10
+
+        bullet = Bullet(
+            self.player.x + dx * 15,
+            self.player.y + dy * 15,
+            dx,
+            dy
+        )
+
+        self.bullets.append(bullet)
+
+        print("총알 생성됨:", len(self.bullets))
+
     def update(self, keys):
-        if self.result: return
+        if self.result:
+            return
+
+        if self.shoot_cooldown > 0:
+            self.shoot_cooldown -= 1
+
         dx = dy = 0
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]: dx = -1
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]: dx = 1
-        if keys[pygame.K_UP] or keys[pygame.K_w]: dy = -1
-        if keys[pygame.K_DOWN] or keys[pygame.K_s]: dy = 1
+        if keys[pygame.K_LEFT]: dx = -1
+        if keys[pygame.K_RIGHT]: dx = 1
+        if keys[pygame.K_UP]: dy = -1
+        if keys[pygame.K_DOWN]: dy = 1
 
         # 상하좌우반전 함정 효과: 5초 동안 모든 방향 입력을 반대로 적용
         if self.player.reverse_timer > 0:
@@ -635,7 +729,66 @@ class GameScene:
         for m in self.monsters:
             m.update(self.maze, self.TILE, self.player.x, self.player.y)
 
+        for bullet in self.bullets:
+            bullet.update()
+
+        for bullet in self.bullets:
+
+            col = int(bullet.x // self.TILE)
+            row = int(bullet.y // self.TILE)
+
+            if (
+                    row < 0 or row >= self.ROWS or
+                    col < 0 or col >= self.COLS or
+                    self.maze[row][col] == 1
+            ):
+                bullet.alive = False
+
+            if not bullet.alive:
+                continue
+
+            for monster in self.monsters:
+
+                if not monster.alive:
+                    continue
+
+                dist = math.hypot(
+                    bullet.x - monster.x,
+                    bullet.y - monster.y
+                )
+
+                if dist < bullet.radius + monster.size:
+                    monster.alive = False
+                    bullet.alive = False
+
+                    self._show_msg("💥 몬스터 처치!")
+
+                    break
+
+        self.bullets = [
+            b for b in self.bullets
+            if b.alive
+        ]
+
         self.frame_count += 1
+        spawn_interval = None
+
+        if self.difficulty == "Normal":
+            spawn_interval = 20 * 60
+
+        elif self.difficulty == "Hard":
+            spawn_interval = 10 * 60
+
+        if spawn_interval:
+
+            self.spawn_timer += 1
+
+            if self.spawn_timer >= spawn_interval:
+                self.spawn_timer = 0
+
+                self.spawn_extra_monster()
+
+                self._show_msg("⚠️ 적 증원 감지!")
 
         # 시간왜곡 아이템 효과: 3초 동안 화면 타이머가 0.5배 속도로 감소
         if self.time_warp_timer > 0:
@@ -687,6 +840,9 @@ class GameScene:
             if -T < m.x - ox < PLAY_ZONE_W and 45 - T < m.y - oy < HEIGHT:
                 m.draw(surface, ox, oy)
 
+        for bullet in self.bullets:
+            bullet.draw(surface, ox, oy)
+
         if 45 - self.player.size < self.player.y - oy < HEIGHT:
             self.player.draw(surface, ox, oy)
 
@@ -713,7 +869,7 @@ class GameScene:
         elif self.difficulty == "Normal":
             fog_alpha = 150
         else:  # Hard
-            fog_alpha = 190
+            fog_alpha = 240
         fog.fill((10, 15, 25, fog_alpha))
 
         pygame.draw.circle(fog, (0, 0, 0, 0), (int(px_screen), int(py_screen - 45)), int(vision))
@@ -941,6 +1097,28 @@ class GameController:
 
                 self._set("RESULT")
                 return
+
+        if self.state == "PLAY" and self.scene:
+
+            if event.type == pygame.KEYDOWN:
+
+                print("키 입력 감지:", event.key)
+
+                if event.key == pygame.K_w:
+                    print("W 발사")
+                    self.scene.shoot_direction(0, -1)
+
+                elif event.key == pygame.K_s:
+                    print("S 발사")
+                    self.scene.shoot_direction(0, 1)
+
+                elif event.key == pygame.K_a:
+                    print("A 발사")
+                    self.scene.shoot_direction(-1, 0)
+
+                elif event.key == pygame.K_d:
+                    print("D 발사")
+                    self.scene.shoot_direction(1, 0)
 
         for btn in self.buttons.get(self.state, []):
             btn.handle_event(event)

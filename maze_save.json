@@ -2,8 +2,8 @@
     "unlocked": {
         "Easy_1": true,
         "Easy_2": true,
-        "Easy_3": false,
-        "Easy_4": false,
+        "Easy_3": true,
+        "Easy_4": true,
         "Easy_5": false,
         "Normal_1": true,
         "Normal_2": false,
@@ -17,9 +17,9 @@
         "Hard_5": false
     },
     "best_time": {
-        "Easy_1": 101,
-        "Easy_2": null,
-        "Easy_3": null,
+        "Easy_1": 9,
+        "Easy_2": 17,
+        "Easy_3": 28,
         "Easy_4": null,
         "Easy_5": null,
         "Normal_1": null,
