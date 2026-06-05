@@ -3,11 +3,11 @@
         "Easy_1": true,
         "Easy_2": true,
         "Easy_3": true,
-        "Easy_4": true,
+        "Easy_4": false,
         "Easy_5": false,
         "Normal_1": true,
         "Normal_2": true,
-        "Normal_3": false,
+        "Normal_3": true,
         "Normal_4": false,
         "Normal_5": false,
         "Hard_1": true,
@@ -17,19 +17,13 @@
         "Hard_5": false
     },
     "best_time": {
-<<<<<<< HEAD
-        "Easy_1": 10,
-        "Easy_2": 41,
-        "Easy_3": 46,
-=======
-        "Easy_1": 9,
-        "Easy_2": 17,
-        "Easy_3": 28,
->>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6
+        "Easy_1": 13,
+        "Easy_2": 50,
+        "Easy_3": null,
         "Easy_4": null,
         "Easy_5": null,
-        "Normal_1": 59,
-        "Normal_2": null,
+        "Normal_1": 32,
+        "Normal_2": 103,
         "Normal_3": null,
         "Normal_4": null,
         "Normal_5": null,

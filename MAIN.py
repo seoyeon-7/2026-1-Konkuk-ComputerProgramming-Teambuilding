@@ -22,7 +22,7 @@ except Exception as e:
 
 WIDTH, HEIGHT = 700, 700
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("도망쳐 네모야! - 미로 탈출 (듀얼 불렛 에디션)")
+pygame.display.set_caption("Maze Escape : Survival Protocol (듀얼 불렛 에디션)")
 clock = pygame.time.Clock()
 
 
@@ -226,7 +226,7 @@ class Button:
             pygame.draw.rect(surface, (30, 30, 40), self.rect, 2, border_radius=8)
             s = FONT_MID.render(self.text, True, (100, 100, 110))
             surface.blit(s, s.get_rect(center=self.rect.center))
-            lock_s = FONT_TINY.render("🔒 잠김", True, COLORS["빨강"])
+            lock_s = FONT_TINY.render("!! 잠김", True, COLORS["빨강"])
             surface.blit(lock_s, (self.rect.right - 45, self.rect.top + 5))
             return
         col = tuple(min(255, c+30) for c in self.bg) if self.hovered else self.bg
@@ -392,7 +392,7 @@ class Monster:
 
     def draw(self, surface, ox, oy):
         if not self.alive: return
-        color = (155, 89, 182) if self.is_chaser else (231, 76, 60)
+        color = (231, 76, 60)  # 항상 빨간색
         draw_shape(surface, self.shape, color, self.x - ox, self.y - oy, self.size)
 
 class Bullet:
@@ -535,7 +535,7 @@ class GameScene:
         for i in range(count):
             x, y = self._random_floor_pos(exclude_start=True)
             is_chaser = (i % 3 == 0) and (self.difficulty != "Easy")
-            m = Monster(x, y, "동그라미" if not is_chaser else "육각형", speed=m_speed, is_chaser=is_chaser)
+            m = Monster(x, y, "동그라미", speed=m_speed, is_chaser=is_chaser)
             monsters.append(m)
         return monsters
 
@@ -600,44 +600,44 @@ class GameScene:
                         if p.take_damage():
                             self.flash_timer = 12
                             self.shake_intensity = 15
-                            self._show_msg("💔 치명적 함정! 생명 -1")
+                            self._show_msg("치명적 함정! 생명 -1")
                     else:
                         if "hit" in globals().get("SOUNDS", {}):
                             SOUNDS["hit"].play()
                         self.shake_intensity = 8
                         if obj.kind == "이동감소":
                             p.slow_timer = 150
-                            self._show_msg("🐢 점성 늪! 이동속도 저하")
+                            self._show_msg("점성 늪! 이동속도 저하")
                         elif obj.kind == "시야제한":
                             p.vision_expand = -70
-                            self._show_msg("🌑 암흑 가스! 시야 축소")
+                            self._show_msg("암흑 가스! 시야 축소")
                         elif obj.kind == "상하좌우반전":
                             p.reverse_timer = 300
-                            self._show_msg("↔️ 상하좌우 반전! 5초 동안 방향키가 뒤집힙니다")
+                            self._show_msg("상하좌우 반전! 5초 동안 방향키가 뒤집힙니다")
                 else:
                     if "coin" in globals().get("SOUNDS", {}):
                         SOUNDS["coin"].play()
                     if obj.kind == "체력회복":
                         p.hp = min(3, p.hp + 1)
-                        self._show_msg("❤️ 메디킷 회복 완료")
+                        self._show_msg("부상 치료 완료! 생명 +1")
                     elif obj.kind == "적처치":
                         for m in self.monsters: m.alive = False
-                        self._show_msg("⚡ EMP 폭발! 모든 적 소멸")
+                        self._show_msg("지뢰 폭발! 모든 적 소멸")
                     elif obj.kind == "속도증가":
                         p.speed_boost = 200
-                        self._show_msg("💨 과부하 주입! 이동속도 증가")
+                        self._show_msg("과부하 주입! 이동속도 증가")
                     elif obj.kind == "시야확대":
                         p.vision_expand = 130
-                        self._show_msg("👁 서치라이트 가동! 시야 전개")
+                        self._show_msg("서치라이트 가동! 시야 확장")
                     elif obj.kind == "적일시정지":
                         for m in self.monsters: m.stun = 180
-                        self._show_msg("⏸ 시공간 정지! 적 행동 불능")
+                        self._show_msg("시공간 정지! 적 행동 불능")
                     elif obj.kind == "시간왜곡":
                         self.time_warp_timer = 180
-                        self._show_msg("⏳ 시간 왜곡! 3초 동안 타이머가 느려집니다")
+                        self._show_msg("시간 왜곡! 3초 동안 타이머가 느려집니다")
                     elif obj.kind == "미니맵":
                         self.minimap_timer = 240
-                        self._show_msg("🗺 미니맵 활성화! 4초 동안 지형과 열쇠 위치가 표시됩니다")
+                        self._show_msg("미니맵 활성화! 4초 동안 지형과 열쇠 위치가 표시됩니다")
 
         for ammo in self.ammo_items:
             if not ammo.alive: continue
@@ -645,17 +645,17 @@ class GameScene:
                 if ammo.type == "red":
                     p.ammo_red += 1
                     ammo.alive = False
-                    self._show_msg("🔫 일반 탄약(R) +1 획득!")
+                    self._show_msg("일반 탄약(R) +1 획득!")
                 elif ammo.type == "blue":
                     p.ammo_blue += 1
                     ammo.alive = False
-                    self._show_msg("💣 특수 파괴 탄약(B) +1 획득!")
+                    self._show_msg("특수 파괴 탄약(B) +1 획득!")
 
         if self.need_key and not p.has_key:
             kx, ky = self.key_pos
             if abs(p.x - kx) < pr + 14 and abs(p.y - ky) < pr + 14:
                 p.has_key = True
-                self._show_msg("🔑 데이터 열쇠 확보! 출구 봉쇄 해제")
+                self._show_msg("열쇠 확보! 출구 봉쇄 해제")
 
         ex = self.exit_col * self.TILE + self.TILE//2
         ey = self.exit_row * self.TILE + self.TILE//2
@@ -674,7 +674,7 @@ class GameScene:
                         SOUNDS["hit"].play()
                     self.flash_timer = 15
                     self.shake_intensity = 22
-                    self._show_msg("💥 크리티컬 히트! 몬스터 충돌")
+                    self._show_msg("크리티컬 히트! 몬스터 충돌")
 
         if p.hp <= 0: self.result = "LOSE"
             
@@ -690,7 +690,7 @@ class GameScene:
         
         if bullet_type == "red":
             if p.ammo_red <= 0:
-                self._show_msg("❌ 일반 탄약 부족")
+                self._show_msg("일반 탄약 부족")
                 return
             p.ammo_red -= 1
             
@@ -706,7 +706,7 @@ class GameScene:
 
         elif bullet_type == "blue":
             if p.ammo_blue <= 0:
-                self._show_msg("❌ 특수 파괴 탄약 부족")
+                self._show_msg("특수 파괴 탄약 부족")
                 return
             p.ammo_blue -= 1
             
@@ -758,7 +758,7 @@ class GameScene:
                         if 0 < row < self.ROWS-1 and 0 < col < self.COLS-1:
                             self.maze[row][col] = 0
                             bullet.alive = False
-                            self._show_msg("🧱 특수 총알로 벽을 부수었습니다!")
+                            self._show_msg("특수 총알로 벽을 부수었습니다!")
                             self.shake_intensity = 6
                     else:
                         bullet.alive = False
@@ -774,7 +774,7 @@ class GameScene:
                     bullet.alive = False
                     if "monster" in globals().get("SOUNDS", {}):
                         SOUNDS["monster"].play()
-                    self._show_msg("💥 몬스터 처치!")
+                    self._show_msg("몬스터 처치!")
                     break
 
         self.bullets = [b for b in self.bullets if b.alive]
@@ -792,7 +792,7 @@ class GameScene:
             if self.spawn_timer >= spawn_interval:
                 self.spawn_timer = 0
                 self.spawn_extra_monster()
-                self._show_msg("⚠️ 적 증원 감지!")
+                self._show_msg("적 증원 감지!")
 
         if self.time_warp_timer > 0:
             self.time_warp_timer -= 1
@@ -871,7 +871,7 @@ class GameScene:
         ex, ey = self.exit_col * T - ox, self.exit_row * T - oy
         if -T < ex < PLAY_ZONE_W and 45 - T < ey < HEIGHT:
             pygame.draw.rect(surface, COLORS["출구"], (ex, ey, T, T))
-            label = "EXIT" if (not self.need_key or self.player.has_key) else "🔒"
+            label = "EXIT" if (not self.need_key or self.player.has_key) else "X"
             s = FONT_TINY.render(label, True, COLORS["블랙"])
             surface.blit(s, s.get_rect(center=(ex+T//2, ey+T//2)))
 
@@ -931,6 +931,7 @@ class GameScene:
             surface.blit(flash, (0, 45))
 
         pygame.draw.rect(surface, COLORS["HUD_BG"], (0, 0, PLAY_ZONE_W, 45))
+        elapsed_time = self.frame_count // 60
         pygame.draw.line(surface, COLORS["그레이"], (0, 45), (PLAY_ZONE_W, 45), 2)
         for i in range(3):
             col = COLORS["빨강"] if i < self.player.hp else (40, 40, 45)
@@ -938,16 +939,33 @@ class GameScene:
             pygame.draw.circle(surface, COLORS["화이트"], (30 + i*30, 22), 10, 1)
 
         if self.difficulty != "Easy":
-            ammo_text = FONT_TINY.render(
-                f"일반(WASD): {self.player.ammo_red} | 특수(Space): {self.player.ammo_blue}",
+            ammo_red_text = FONT_TINY.render(
+                f"일반(WASD): {self.player.ammo_red}",
                 True,
                 COLORS["연그레이"]
             )
-            surface.blit(ammo_text, (115, 15))
+
+            ammo_blue_text = FONT_TINY.render(
+                f"특수(Space): {self.player.ammo_blue}",
+                True,
+                COLORS["연그레이"]
+            )
+
+            surface.blit(ammo_red_text, (115, 6))
+            surface.blit(ammo_blue_text, (115, 24))
 
         t_color = COLORS["빨강"] if self.time_left <= 25 else COLORS["화이트"]
-        t_surf = FONT_MID.render(f"⏱ {self.time_left}s", True, t_color)
-        surface.blit(t_surf, t_surf.get_rect(midright=(PLAY_ZONE_W - 130, 22)))
+        hud_y = 22
+
+        t_surf = FONT_SMALL.render(f"제한: {self.time_left}s", True, t_color)
+        surface.blit(t_surf, t_surf.get_rect(midright=(PLAY_ZONE_W - 130, hud_y)))
+
+        elapsed_text = FONT_SMALL.render(
+            f"경과: {elapsed_time}s",
+            True,
+            COLORS["화이트"]
+        )
+        surface.blit(elapsed_text, (255, hud_y - 9))
 
         info = FONT_SMALL.render(f"ST {self.stage} | {self.cfg['label']}", True, COLORS["연그레이"])
         surface.blit(info, info.get_rect(midright=(PLAY_ZONE_W - 15, 22)))
@@ -956,7 +974,7 @@ class GameScene:
         pygame.draw.rect(surface, COLORS["패널"], (panel_x, 0, 160, HEIGHT))
         pygame.draw.line(surface, COLORS["연그레이"], (panel_x, 0), (panel_x, HEIGHT), 2)
 
-        surface.blit(FONT_SMALL.render("레이더 정보 고지", True, COLORS["노랑"]), (panel_x + 12, 68))
+        surface.blit(FONT_SMALL.render("아이콘 종류 의미", True, COLORS["노랑"]), (panel_x + 12, 68))
 
         pygame.draw.circle(surface, COLORS["아이템_원"], (panel_x + 20, 105), 7, 1)
         draw_shape(surface, "하트", (255, 100, 150), panel_x + 20, 105, 5)
@@ -964,15 +982,18 @@ class GameScene:
 
         pygame.draw.circle(surface, COLORS["아이템_원"], (panel_x + 20, 130), 7, 1)
         draw_long_item_diamond(surface, panel_x + 20, 130, 5)
-        surface.blit(FONT_TINY.render("스페셜 이펙트", True, COLORS["화이트"]), (panel_x + 36, 123))
+        surface.blit(FONT_TINY.render("아이템", True, COLORS["화이트"]), (panel_x + 36, 123))
 
-        pygame.draw.circle(surface, COLORS["함정_원"], (panel_x + 20, 175), 7, 2)
-        draw_shape(surface, "세모", (50, 20, 20), panel_x + 20, 175, 4)
-        surface.blit(FONT_TINY.render("생명 차감 위험", True, COLORS["연그레이"]), (panel_x + 36, 168))
+        pygame.draw.circle(surface, COLORS["함정_원"], (panel_x + 20, 155), 7, 2)
+        draw_shape(surface, "세모", (50, 20, 20), panel_x + 20, 155, 4)
+        surface.blit(FONT_TINY.render("함정", True, COLORS["연그레이"]), (panel_x + 36, 148))
 
-        pygame.draw.circle(surface, COLORS["함정_원"], (panel_x + 20, 200), 7, 2)
-        draw_shape(surface, "세모", (50, 20, 20), panel_x + 20, 200, 4)
-        surface.blit(FONT_TINY.render("디버프/워프", True, COLORS["연그레이"]), (panel_x + 36, 193))
+        pygame.draw.circle(surface, COLORS["빨강"], (panel_x + 20, 180), 7)
+        surface.blit(FONT_TINY.render("일반 탄약 (WASD)", True, COLORS["화이트"]), (panel_x + 36, 173))
+
+
+        pygame.draw.circle(surface, COLORS["파랑"], (panel_x + 20, 205), 7)
+        surface.blit(FONT_TINY.render("특수 탄약 (Space)", True, COLORS["화이트"]), (panel_x + 36, 198))
 
         if self.need_key:
             draw_key(surface, panel_x + 20, 245, 0.65)
@@ -990,11 +1011,11 @@ class GameScene:
             ov = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
             ov.fill((10, 10, 15, 210))
             surface.blit(ov, (0, 0))
-            msg = "🎉 미로 탈출 성공!" if self.result == "WIN" else "💀 차단 및 작전 실패"
+            msg = "미로 탈출 성공!" if self.result == "WIN" else "생존 실패"
             col = COLORS["출구"] if self.result == "WIN" else COLORS["빨강"]
             rs = FONT_BIG.render(msg, True, col)
             surface.blit(rs, rs.get_rect(center=(WIDTH//2, HEIGHT//2 - 40)))
-            hint = FONT_MID.render("[ 아무 키나 누르면 정산 화면으로 ]", True, COLORS["화이트"])
+            hint = FONT_MID.render("[ 아무 키나 누르면 메인 화면으로 ]", True, COLORS["화이트"])
             surface.blit(hint, hint.get_rect(center=(WIDTH//2, HEIGHT//2 + 40)))
 
 
@@ -1041,31 +1062,56 @@ class GameController:
 
         if self.state == "START":
             start_buttons = [
-                (240, "미로 진입 하기", (46, 204, 113), "DIFFICULTY"),
-                (320, "플레이어 외형 변경", (52, 152, 219), "CUSTOM"),
+                (240, "미로 진입", (46, 204, 113), "DIFFICULTY"),
+                (320, "커스터마이즈", (52, 152, 219), "CUSTOM"),
                 (400, "게임 설명", (155, 89, 182), "HELP")
             ]
             for y, label, bg, target in start_buttons:
                 self.buttons["START"].append(Button(240, y, 220, 55, label, bg, COLORS["화이트"], lambda t=target: self._set(t)))
 
+
         elif self.state == "CUSTOM":
+            preview_panel = pygame.Rect(40, 120, 260, 420)
+            self.custom_preview_rect = preview_panel
+            shape_y = 200
             for i, sh in enumerate(SHAPES):
-                bx = 60 + (i % 5) * 120
-                by = 200 + (i // 5) * 60
-                self.buttons["CUSTOM"].append(Button(bx, by, 100, 45, sh, (70, 75, 90), COLORS["화이트"], (lambda s: lambda: setattr(self, 'character_shape', s))(sh)))
-            
-            color_list = [
-                ("빨강", COLORS["빨강"]), ("주황", COLORS["주황"]), ("노랑", COLORS["노랑"]), ("초록", COLORS["초록"]),
-                ("파랑", COLORS["파랑"]), ("보라", COLORS["보라"]), ("핑크", COLORS["핑크"]), ("민트", COLORS["민트"]),
-                ("차콜", COLORS["차콜"]), ("블랙", COLORS["블랙"])
-            ]
-            for i, (color_name, color_value) in enumerate(color_list):
-                bx = 60 + (i % 5) * 120
-                by = 360 + (i // 5) * 60
-                fg_color = COLORS["화이트"] if color_name != "노랑" else COLORS["블랙"]
-                self.buttons["CUSTOM"].append(Button(bx, by, 100, 45, color_name, color_value, fg_color, (lambda c: lambda: setattr(self, 'character_color', c))(color_value)))
-            
-            self.buttons["CUSTOM"].append(Button(250, 620, 200, 50, "외형 설정 후 복귀", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("START")))
+                x = 360 + (i % 2) * 160
+                y = shape_y + (i // 2) * 70
+                def make_shape_callback(s):
+                    return lambda: setattr(self, "character_shape", s)
+                self.buttons["CUSTOM"].append(
+                    Button(
+                        x, y, 110, 40,
+                        sh,
+                        (60, 65, 80),
+                        COLORS["화이트"],
+                        make_shape_callback(sh)
+                    )
+                )
+            color_list = [("빨강", COLORS["빨강"]), ("주황", COLORS["주황"]), ("노랑", COLORS["노랑"]), ("초록", COLORS["초록"]), ("파랑", COLORS["파랑"]), ("보라", COLORS["보라"]), ("핑크", COLORS["핑크"]), ("민트", COLORS["민트"]), ("차콜", COLORS["차콜"]), ("블랙", COLORS["블랙"])]
+            for i, (name, col) in enumerate(color_list):
+                x = 360 + (i % 5) * 60
+                y = 350 + (i // 5) * 60
+                def make_color_callback(c):
+                    return lambda: setattr(self, "character_color", c)
+                self.buttons["CUSTOM"].append(
+                    Button(
+                        x, y, 50, 50,
+                        "",
+                        col,
+                        COLORS["화이트"],
+                        make_color_callback(col)
+                    )
+                )
+            self.buttons["CUSTOM"].append(
+                Button(
+                    260, 600, 220, 50,
+                    "저장하기",
+                    (46, 204, 113),
+                    COLORS["화이트"],
+                    lambda: self._set("START")
+                )
+            )
 
         elif self.state == "HELP":
             self.buttons["HELP"].append(Button(250, 600, 200, 50, "메인 화면으로", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("START")))
@@ -1090,11 +1136,11 @@ class GameController:
 
         elif self.state == "RESULT":
             is_win = self.result_data.get("result") == "WIN"
-            result_buttons = [(250, "메인 타이틀 이동", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("START"))]
+            result_buttons = [(250, "메인 화면 이동", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("START"))]
             if is_win and self.result_data.get("stage", 1) < 5:
                 result_buttons = [
                     (130, "다음 스테이지", (46, 204, 113), COLORS["화이트"], self._next_stage_go),
-                    (370, "메인 타이틀 이동", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("START"))
+                    (370, "메인 화면 이동", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("START"))
                 ]
             for x, label, bg, fg, cb in result_buttons:
                 self.buttons["RESULT"].append(Button(x, 480, 200, 55, label, bg, fg, cb))
@@ -1150,7 +1196,7 @@ class GameController:
             self.scene.update(keys)
 
     def draw(self, surface):
-        if self.state in ["START", "CUSTOM", "HELP", "DIFFICULTY", "STAGE"]:
+        if self.state in ["START", "DIFFICULTY", "STAGE"]:
             draw_menu_background(surface)
         else:
             surface.fill(COLORS["HUD_BG"])
@@ -1166,8 +1212,8 @@ class GameController:
 
             base_text = [
                 ("< 기본 설명 >", COLORS["민트"]),
-                ("미로를 탈출하는 액션 게임입니다!", COLORS["화이트"]),
-                ("열쇠를 획득하고 출구까지 도달하세요!", COLORS["화이트"])
+                ("미로를 탈출하는 생존 전략 액션 게임입니다!", COLORS["화이트"]),
+                ("적을 피해 열쇠를 획득하고 출구까지 도달하세요!", COLORS["화이트"])
             ]
             draw_text_lines(surface, base_text, 80, 140, 22)
 
@@ -1178,9 +1224,9 @@ class GameController:
             right_x = 420
 
             left_lines = [
-                ("게임 목표", COLORS["민트"]), ("- 미로 탐험", COLORS["화이트"]), ("- 열쇠 획득 후 탈출", COLORS["화이트"]),
-                ("", COLORS["화이트"]), ("조작법", COLORS["민트"]), ("- WASD 사격 / 방향키 이동", COLORS["화이트"]),
-                ("- 스페이스바 : 파괴 총알", COLORS["화이트"]), ("적", COLORS["민트"]), ("- 충돌 시 체력 감소", COLORS["화이트"])
+                ("게임 목표", COLORS["민트"]), ("- 열쇠 획득 후 탈출하세요 (ST 2~5)", COLORS["화이트"]), ("- 총알로 적을 처치할 수 있습니다 (N/H)", COLORS["화이트"]),
+                ("- 특수 총알은 벽 파괴 가능합니다 (N/H)", COLORS["화이트"]), ("- 기본 생명은 3개입니다", COLORS["화이트"]), ("- 함정/아이템/생명/탄약을 찾아보세요", COLORS["화이트"]), ("", COLORS["화이트"]), ("조작법", COLORS["민트"]), ("- 화살표 방향키 : 이동", COLORS["화이트"]),
+                ("- WASD : 일반 총알", COLORS["화이트"]), ("- SPACE : 벽 파괴 총알", COLORS["화이트"])
             ]
             draw_text_lines(surface, left_lines, left_x, 225, 28)
 
@@ -1189,25 +1235,41 @@ class GameController:
             pygame.draw.rect(surface, (42, 42, 58), (405, 385, 210, 135), border_radius=10)
             pygame.draw.rect(surface, (70, 90, 105), (405, 385, 210, 135), 1, border_radius=10)
 
-            item_lines = ["아이템", "- 체력 회복", "- 적 제거", "- 속도 증가", "- 시야 확대", "- 적 정지", "- 시간 왜곡", "- 미니맵"]
+            item_lines = ["아이템", "- 적 제거 / 적 정지", "- 속도 증가", "- 시야 확대", "- 시간 왜곡", "- 미니맵"]
             trap_lines = ["함정", "- 생명 감소", "- 이동 속도 감소", "- 시야 제한", "- 상하좌우 반전"]
 
             draw_text_lines(surface, [(t, COLORS["민트"] if i == 0 else COLORS["화이트"]) for i, t in enumerate(item_lines)], right_x, 225, 21)
             draw_text_lines(surface, [(t, COLORS["민트"] if i == 0 else COLORS["화이트"]) for i, t in enumerate(trap_lines)], right_x, 395, 21)
 
         if self.state == "START":
-            txt = FONT_BIG.render("< 도망쳐! 네모 미로 >", True, COLORS["노랑"])
+            txt = FONT_BIG.render("< Maze Escape : Survival Protocol >", True, COLORS["노랑"])
             surface.blit(txt, txt.get_rect(center=(WIDTH//2, 140)))
 
-        elif self.state == "CUSTOM":
-            pygame.draw.rect(surface, (20, 20, 30), (260, 95, 180, 105), border_radius=12)
-            pygame.draw.rect(surface, COLORS["연그레이"], (260, 95, 180, 105), 2, border_radius=12)
 
-            txt = FONT_MID.render("플레이어 외형 변경 커스터마이징", True, COLORS["파랑"])
-            surface.blit(txt, txt.get_rect(center=(WIDTH // 2, 80)))
-            draw_shape(surface, self.character_shape, self.character_color, WIDTH // 2, 140, 25)
-            info = FONT_SMALL.render(f"현재 선택: {self.character_shape}", True, COLORS["화이트"])
-            surface.blit(info, info.get_rect(center=(WIDTH // 2, 180)))
+        elif self.state == "CUSTOM":
+            surface.fill((18, 18, 28))
+            preview = pygame.Rect(40, 120, 260, 420)
+            pygame.draw.rect(surface, (30, 30, 45), preview, border_radius=12)
+            pygame.draw.rect(surface, COLORS["연그레이"], preview, 2, border_radius=12)
+            title = FONT_BIG.render("CUSTOMIZE", True, COLORS["노랑"])
+            surface.blit(title, title.get_rect(center=(WIDTH // 2, 70)))
+            draw_shape(
+                surface,
+                self.character_shape,
+                self.character_color,
+                preview.centerx,
+                preview.centery,
+                40
+            )
+            info1 = FONT_SMALL.render(f"SHAPE: {self.character_shape}", True, COLORS["화이트"])
+            info2 = FONT_SMALL.render("COLOR SELECTED", True, self.character_color)
+            surface.blit(info1, (preview.x + 20, preview.y + 320))
+            surface.blit(info2, (preview.x + 20, preview.y + 350))
+            panel = pygame.Rect(330, 120, 330, 420)
+            pygame.draw.rect(surface, (25, 25, 38), panel, border_radius=12)
+            pygame.draw.rect(surface, COLORS["연그레이"], panel, 2, border_radius=12)
+            label = FONT_MID.render("SELECT SHAPE / COLOR", True, COLORS["민트"])
+            surface.blit(label, (panel.x + 20, panel.y + 20))
 
         elif self.state == "DIFFICULTY":
             txt = FONT_BIG.render("작전 난이도 선택", True, COLORS["화이트"])
@@ -1233,18 +1295,18 @@ class GameController:
             pygame.draw.rect(surface, (10, 10, 20), bg_rect, border_radius=8)
             surface.blit(title_surface, title_rect)
 
-            st_text = f"진입 섹터: 스테이지 {self.result_data.get('stage')}"
+            st_text = f"스테이지: {self.result_data.get('stage')}"
             df_text = f"설정 난이도: {self.result_data.get('diff')}"
             tm_text = f"소요 시간: {self.result_data.get('time')} 초" if is_win else "기록 합산 불가"
 
             current_key = f"{self.result_data.get('diff')}_{self.result_data.get('stage')}"
             best_rec = self.save_data["best_time"].get(current_key)
-            bs_text = f"이 난이도 최고 기록: {best_rec} 초" if best_rec else "최고 기록: 없음"
+            bs_text = f"최고 기록: {best_rec} 초" if best_rec else "최고 기록: 없음"
 
-            surface.blit(FONT_MID.render(st_text, True, COLORS["화이트"]), (180, 230))
-            surface.blit(FONT_MID.render(df_text, True, COLORS["화이트"]), (180, 275))
+            surface.blit(FONT_MID.render(df_text, True, COLORS["화이트"]), (180, 230))
+            surface.blit(FONT_MID.render(st_text, True, COLORS["화이트"]), (180, 275))
             surface.blit(FONT_MID.render(tm_text, True, COLORS["노랑"]), (180, 320))
-            surface.blit(FONT_SMALL.render(bs_text, True, COLORS["민트"]), (180, 380))
+            surface.blit(FONT_MID.render(bs_text, True, COLORS["빨강"]), (180, 380))
 
         for btn in self.buttons.get(self.state, []):
             btn.draw(surface)
