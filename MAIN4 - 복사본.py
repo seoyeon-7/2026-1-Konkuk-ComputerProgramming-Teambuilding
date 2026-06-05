@@ -2,9 +2,17 @@ import pygame, sys, random, math, json, os
 from collections import deque
 from PIL import Image
 
+<<<<<<< HEAD:MAIN4 - 복사본.py
 pygame.init()
 pygame.mixer.init()
 
+=======
+# --- 초기화 및 사운드 설정 ---
+pygame.init()
+pygame.mixer.init()
+
+# 사운드 로드
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
 try:
     SOUNDS = {
         "clear": pygame.mixer.Sound("clear.mp3"),
@@ -15,7 +23,11 @@ try:
         "coin": pygame.mixer.Sound("coin.mp3")
     }
     pygame.mixer.music.load("bgm.mp3")
+<<<<<<< HEAD:MAIN4 - 복사본.py
     pygame.mixer.music.play(-1)
+=======
+    pygame.mixer.music.play(-1) # 전체 BGM 무한 재생
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
 except Exception as e:
     print(f"사운드 파일을 찾을 수 없습니다: {e}")
     SOUNDS = {}
@@ -83,12 +95,20 @@ DIFFICULTY = {
     "Normal": {
         "monsters": 2, "time": 180,
         "trap_rate": 0.018,
+<<<<<<< HEAD:MAIN4 - 복사본.py
         "item_rate": 0.028, "label": "보통", "monster_speed": 2.1,
+=======
+        "item_rate": 0.025, "label": "보통", "monster_speed": 2.1,
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
         "cols": 31, "rows": 31
     },
     "Hard": {
         "monsters": 3, "time": 250,
+<<<<<<< HEAD:MAIN4 - 복사본.py
         "trap_rate": 0.025, "item_rate": 0.025, "label": "어려움", "monster_speed": 2.1,
+=======
+        "trap_rate": 0.025, "item_rate": 0.02, "label": "어려움", "monster_speed": 2.1,
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
         "cols": 41, "rows": 41
     },
 }
@@ -277,6 +297,7 @@ class Player:
         self.speed_boost = 0
         self.hit_blindness = 0
         self.reverse_timer = 0
+<<<<<<< HEAD:MAIN4 - 복사본.py
         self.size = 9.0
         
         self.last_dx = 1
@@ -284,6 +305,17 @@ class Player:
         
         self.ammo_red = 2   
         self.ammo_blue = 0  
+=======
+        self.size = 11.0
+        
+        # 총알 방향 분리를 위한 조작 기록용 변수
+        self.last_dx = 1
+        self.last_dy = 0
+        
+        # 탄약 종류 완벽 분리
+        self.ammo_red = 2   # 일반 몬스터 처치용 탄약
+        self.ammo_blue = 0  # 벽 파괴용 특수 탄약
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
 
     def move(self, dx, dy, maze, tile):
         spd = self.speed
@@ -406,13 +438,21 @@ class Bullet:
         self.speed = 8
         self.radius = 5
         self.alive = True
+<<<<<<< HEAD:MAIN4 - 복사본.py
         self.type = bullet_type  
+=======
+        self.type = bullet_type  # "red" 또는 "blue" 구분
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
 
     def update(self):
         self.x += self.dx * self.speed
         self.y += self.dy * self.speed
 
     def draw(self, surface, ox, oy):
+<<<<<<< HEAD:MAIN4 - 복사본.py
+=======
+        # 종류에 따라 명확하게 색상 구분 시각화
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
         color = COLORS["빨강"] if self.type == "red" else COLORS["파랑"]
         pygame.draw.circle(
             surface,
@@ -455,7 +495,11 @@ class AmmoItem:
         self.y = y
         self.alive = True
         self.size = 10
+<<<<<<< HEAD:MAIN4 - 복사본.py
         self.type = ammo_type 
+=======
+        self.type = ammo_type # "red" 또는 "blue" 반반 생성용
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
 
     def draw(self, surface, ox, oy):
         if not self.alive: return
@@ -561,12 +605,21 @@ class GameScene:
             x, y = self._random_floor_pos(exclude_start=True)
             self.objects.append(MapObject(x, y, "체력회복", is_trap=False))
 
+<<<<<<< HEAD:MAIN4 - 복사본.py
         if self.difficulty != "Easy":
             ammo_count = 4
             for i in range(ammo_count):
                 x, y = self._random_floor_pos(exclude_start=True)
                 a_type = "red" if i % 2 == 0 else "blue"
                 self.ammo_items.append(AmmoItem(x, y, ammo_type=a_type))
+=======
+        # 중요 피드백 반영: 탄약 아이템 빨강/파랑 필드에 정확히 반반 스폰구현
+        ammo_count = 4
+        for i in range(ammo_count):
+            x, y = self._random_floor_pos(exclude_start=True)
+            a_type = "red" if i % 2 == 0 else "blue"
+            self.ammo_items.append(AmmoItem(x, y, ammo_type=a_type))
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
 
     def _camera(self):
         PLAY_ZONE_W = WIDTH - 160
@@ -588,6 +641,7 @@ class GameScene:
         p = self.player
         pr = p.size
 
+        # 1. 아이템 및 함정 처리
         for obj in self.objects:
             if not obj.alive: continue
             if abs(p.x - obj.x) < pr + obj.size and abs(p.y - obj.y) < pr + obj.size:
@@ -634,6 +688,7 @@ class GameScene:
                     elif obj.kind == "시간왜곡":
                         self.time_warp_timer = 180
                         self._show_msg("⏳ 시간 왜곡! 3초 동안 타이머가 느려집니다")
+<<<<<<< HEAD:MAIN4 - 복사본.py
 
         for ammo in self.ammo_items:
             if not ammo.alive: continue
@@ -646,13 +701,30 @@ class GameScene:
                     p.ammo_blue += 1
                     ammo.alive = False
                     self._show_msg("💣 특수 파괴 탄약(B) +1 획득!")
+=======
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
 
+        # 2. 종류별 탄약 획득 분리 처리
+        for ammo in self.ammo_items:
+            if not ammo.alive: continue
+            if abs(p.x - ammo.x) < pr + ammo.size and abs(p.y - ammo.y) < pr + ammo.size:
+                if ammo.type == "red":
+                    p.ammo_red += 1
+                    ammo.alive = False
+                    self._show_msg("🔫 일반 탄약(R) +1 획득!")
+                elif ammo.type == "blue":
+                    p.ammo_blue += 1
+                    ammo.alive = False
+                    self._show_msg("💣 특수 파괴 탄약(B) +1 획득!")
+
+        # 3. 데이터 열쇠 획득 처리
         if self.need_key and not p.has_key:
             kx, ky = self.key_pos
             if abs(p.x - kx) < pr + 14 and abs(p.y - ky) < pr + 14:
                 p.has_key = True
                 self._show_msg("🔑 데이터 열쇠 확보! 출구 봉쇄 해제")
 
+        # 4. 출구 도달
         ex = self.exit_col * self.TILE + self.TILE//2
         ey = self.exit_row * self.TILE + self.TILE//2
         if abs(p.x - ex) < pr + 16 and abs(p.y - ey) < pr + 16:
@@ -661,6 +733,7 @@ class GameScene:
                     SOUNDS["clear"].play()
                 self.result = "WIN"
 
+        # 5. 플레이어와 몬스터 충돌
         for m in self.monsters:
             if not m.alive: continue
             if abs(p.x - m.x) < pr + m.size and abs(p.y - m.y) < pr + m.size:
@@ -678,6 +751,10 @@ class GameScene:
         self.msg = text
         self.msg_timer = 100
 
+<<<<<<< HEAD:MAIN4 - 복사본.py
+=======
+    # 중요 피드백 반영: WASD 일반 사격(Red)과 스페이스바 특수 사격(Blue) 분리 시스템
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
     def shoot_bullet(self, bullet_type, dx=0, dy=0):
         if self.shoot_cooldown > 0: 
             return
@@ -690,7 +767,12 @@ class GameScene:
                 return
             p.ammo_red -= 1
             
+<<<<<<< HEAD:MAIN4 - 복사본.py
             if dx == 0 and dy == 0:  
+=======
+            # WASD로 발사한 경우: 해당 방향 사용
+            if dx == 0 and dy == 0:  # 방향이 전달되지 않으면 마지막 방향 사용
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
                 dx, dy = p.last_dx, p.last_dy
             if dx == 0 and dy == 0: 
                 dx = 1
@@ -706,6 +788,10 @@ class GameScene:
                 return
             p.ammo_blue -= 1
             
+<<<<<<< HEAD:MAIN4 - 복사본.py
+=======
+            # 스페이스바는 항상 마지막 이동 방향으로 발사
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
             dx, dy = p.last_dx, p.last_dy
             if dx == 0 and dy == 0: 
                 dx = 1
@@ -742,25 +828,45 @@ class GameScene:
         for bullet in self.bullets:
             bullet.update()
 
+<<<<<<< HEAD:MAIN4 - 복사본.py
+=======
+        # 총알 충돌체크 루프 개편
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
         for bullet in self.bullets:
             if not bullet.alive: continue
             
             col = int(bullet.x // self.TILE)
             row = int(bullet.y // self.TILE)
 
+<<<<<<< HEAD:MAIN4 - 복사본.py
             if (0 <= row < self.ROWS and 0 <= col < self.COLS):
                 if self.maze[row][col] == 1:
                     if bullet.type == "blue":
+=======
+            # 벽 충돌 체크
+            if (0 <= row < self.ROWS and 0 <= col < self.COLS):
+                if self.maze[row][col] == 1:
+                    if bullet.type == "blue":
+                        # 테두리 벽이 아닌 경우에만 부수기 허용
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
                         if 0 < row < self.ROWS-1 and 0 < col < self.COLS-1:
                             self.maze[row][col] = 0
                             bullet.alive = False
                             self._show_msg("🧱 특수 총알로 벽을 부수었습니다!")
                             self.shake_intensity = 6
                     else:
+<<<<<<< HEAD:MAIN4 - 복사본.py
+=======
+                        # 일반 빨간색 총알은 벽에 그냥 소멸됨
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
                         bullet.alive = False
 
             if not bullet.alive: continue
 
+<<<<<<< HEAD:MAIN4 - 복사본.py
+=======
+            # 몬스터 충돌 체크 (둘 다 처치 기능 보유)
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
             for monster in self.monsters:
                 if not monster.alive: continue
                 dist = math.hypot(bullet.x - monster.x, bullet.y - monster.y)
@@ -869,7 +975,11 @@ class GameScene:
             fog_alpha = 100
         elif self.difficulty == "Normal":
             fog_alpha = 150
+<<<<<<< HEAD:MAIN4 - 복사본.py
         else:
+=======
+        else:  # Hard
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
             fog_alpha = 240
         fog.fill((10, 15, 25, fog_alpha))
 
@@ -888,6 +998,10 @@ class GameScene:
             pygame.draw.circle(surface, col, (30 + i*30, 22), 10)
             pygame.draw.circle(surface, COLORS["화이트"], (30 + i*30, 22), 10, 1)
 
+<<<<<<< HEAD:MAIN4 - 복사본.py
+=======
+        # 탄약 인벤토리 분리 시각화 구현
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
         ammo_text = FONT_TINY.render(f"일반(WASD): {self.player.ammo_red} | 특수(Space): {self.player.ammo_blue}", True, COLORS["연그레이"])
         surface.blit(ammo_text, (115, 15))
 
@@ -941,6 +1055,7 @@ class GameScene:
             hint = FONT_MID.render("[ 아무 키나 누르면 정산 화면으로 ]", True, COLORS["화이트"])
             surface.blit(hint, hint.get_rect(center=(WIDTH//2, HEIGHT//2 + 40)))
 
+<<<<<<< HEAD:MAIN4 - 복사본.py
 
 
 def draw_text_lines(surface, lines, x, y, gap, font=FONT_SMALL):
@@ -960,6 +1075,8 @@ def draw_menu_background(surface):
     else:
         surface.fill(COLORS["HUD_BG"])
 
+=======
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
 class GameController:
     def __init__(self):
         self.state = "START"
@@ -984,6 +1101,7 @@ class GameController:
         self.buttons = {"START": [], "CUSTOM": [], "HELP": [], "DIFFICULTY": [], "STAGE": [], "RESULT": []}
 
         if self.state == "START":
+<<<<<<< HEAD:MAIN4 - 복사본.py
             start_buttons = [
                 (240, "미로 진입 하기", (46, 204, 113), "DIFFICULTY"),
                 (320, "플레이어 외형 변경", (52, 152, 219), "CUSTOM"),
@@ -991,6 +1109,11 @@ class GameController:
             ]
             for y, label, bg, target in start_buttons:
                 self.buttons["START"].append(Button(240, y, 220, 55, label, bg, COLORS["화이트"], lambda t=target: self._set(t)))
+=======
+            self.buttons["START"].append(Button(240, 240, 220, 55, "미로 진입 하기", (46, 204, 113), COLORS["화이트"], lambda: self._set("DIFFICULTY")))
+            self.buttons["START"].append(Button(240, 320, 220, 55, "플레이어 외형 변경", (52, 152, 219), COLORS["화이트"], lambda: self._set("CUSTOM")))
+            self.buttons["START"].append(Button(240, 400, 220, 55, "게임 설명", (155, 89, 182), COLORS["화이트"], lambda: self._set("HELP")))
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
 
         elif self.state == "CUSTOM":
             for i, sh in enumerate(SHAPES):
@@ -1015,6 +1138,7 @@ class GameController:
             self.buttons["HELP"].append(Button(250, 600, 200, 50, "메인 화면으로", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("START")))
 
         elif self.state == "DIFFICULTY":
+<<<<<<< HEAD:MAIN4 - 복사본.py
             diff_buttons = [
                 (210, "Easy (쉬움)", "Easy", (39, 174, 96), COLORS["화이트"]),
                 (290, "Normal (보통)", "Normal", (241, 196, 15), COLORS["블랙"]),
@@ -1022,6 +1146,11 @@ class GameController:
             ]
             for y, label, diff, bg, fg in diff_buttons:
                 self.buttons["DIFFICULTY"].append(Button(240, y, 220, 55, label, bg, fg, lambda d=diff: (setattr(self, "selected_difficulty", d), self._set("STAGE"))))
+=======
+            self.buttons["DIFFICULTY"].append(Button(240, 210, 220, 55, "Easy (쉬움)", (39, 174, 96), COLORS["화이트"], lambda: (setattr(self,'selected_difficulty','Easy'), self._set("STAGE"))))
+            self.buttons["DIFFICULTY"].append(Button(240, 290, 220, 55, "Normal (보통)", (241, 196, 15), COLORS["블랙"], lambda: (setattr(self,'selected_difficulty','Normal'), self._set("STAGE"))))
+            self.buttons["DIFFICULTY"].append(Button(240, 370, 220, 55, "Hard (어려움)", (192, 41, 43), COLORS["화이트"], lambda: (setattr(self,'selected_difficulty','Hard'), self._set("STAGE"))))
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
             self.buttons["DIFFICULTY"].append(Button(240, 480, 220, 48, "이전 화면으로", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("START")))
 
         elif self.state == "STAGE":
@@ -1036,12 +1165,19 @@ class GameController:
             is_win = self.result_data.get("result") == "WIN"
             result_buttons = [(250, "메인 타이틀 이동", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("START"))]
             if is_win and self.result_data.get("stage", 1) < 5:
+<<<<<<< HEAD:MAIN4 - 복사본.py
                 result_buttons = [
                     (130, "다음 스테이지", (46, 204, 113), COLORS["화이트"], self._next_stage_go),
                     (370, "메인 타이틀 이동", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("START"))
                 ]
             for x, label, bg, fg, cb in result_buttons:
                 self.buttons["RESULT"].append(Button(x, 480, 200, 55, label, bg, fg, cb))
+=======
+                self.buttons["RESULT"].append(Button(130, 480, 200, 55, "다음 스테이지", (46, 204, 113), COLORS["화이트"], self._next_stage_go))
+                self.buttons["RESULT"].append(Button(370, 480, 200, 55, "메인 타이틀 이동", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("START")))
+            else:
+                self.buttons["RESULT"].append(Button(250, 480, 200, 55, "메인 타이틀 이동", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("START")))
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
 
     def _next_stage_go(self):
         self.selected_stage = min(5, self.result_data.get("stage", 1) + 1)
@@ -1071,6 +1207,7 @@ class GameController:
                 self._set("RESULT")
                 return
 
+<<<<<<< HEAD:MAIN4 - 복사본.py
         if self.state == "PLAY" and self.scene:
             if event.type == pygame.KEYDOWN:
                 if self.scene.difficulty != "Easy":
@@ -1082,6 +1219,22 @@ class GameController:
                     }
                     if event.key in shoot_keys:
                         self.scene.shoot_bulpython MAIN4.pylet(*shoot_keys[event.key])
+=======
+        # 입력 이벤트 처리 연동 개편
+        if self.state == "PLAY" and self.scene:
+            if event.type == pygame.KEYDOWN:
+                if self.scene.difficulty != "Easy":
+                    # WASD → 해당 방향으로 일반 총알 발사
+                    if event.key == pygame.K_w:
+                        self.scene.shoot_bullet("red", 0, -1)
+                    elif event.key == pygame.K_s:
+                        self.scene.shoot_bullet("red", 0, 1)
+                    elif event.key == pygame.K_a:
+                        self.scene.shoot_bullet("red", -1, 0)
+                    elif event.key == pygame.K_d:
+                        self.scene.shoot_bullet("red", 1, 0)
+                    # 스페이스바 → 마지막 이동 방향으로 파란 총알
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
                     elif event.key == pygame.K_SPACE:
                         self.scene.shoot_bullet("blue")
 
@@ -1094,10 +1247,14 @@ class GameController:
             self.scene.update(keys)
 
     def draw(self, surface):
+<<<<<<< HEAD:MAIN4 - 복사본.py
         if self.state in ["START", "CUSTOM", "HELP", "DIFFICULTY", "STAGE"]:
             draw_menu_background(surface)
         else:
             surface.fill(COLORS["HUD_BG"])
+=======
+        surface.fill(COLORS["HUD_BG"])
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
 
         if self.state == "PLAY" and self.scene:
             self.scene.draw(surface)
@@ -1113,7 +1270,14 @@ class GameController:
                 ("미로를 탈출하는 액션 게임입니다!", COLORS["화이트"]),
                 ("열쇠를 획득하고 출구까지 도달하세요!", COLORS["화이트"])
             ]
+<<<<<<< HEAD:MAIN4 - 복사본.py
             draw_text_lines(surface, base_text, 80, 140, 22)
+=======
+            for i, text in enumerate(base_text):
+                color = COLORS["민트"] if i == 0 else COLORS["화이트"]
+                surf = FONT_SMALL.render(text, True, color)
+                surface.blit(surf, (80, 140 + i * 22))
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
 
             pygame.draw.line(surface, (80, 80, 100), (80, 205), (620, 205), 1)
             pygame.draw.line(surface, (80, 80, 100), (385, 220), (385, 520), 1)
@@ -1126,6 +1290,7 @@ class GameController:
                 ("", COLORS["화이트"]), ("조작법", COLORS["민트"]), ("- WASD 사격 / 방향키 이동", COLORS["화이트"]),
                 ("- 스페이스바 : 파괴 총알", COLORS["화이트"]), ("적", COLORS["민트"]), ("- 충돌 시 체력 감소", COLORS["화이트"])
             ]
+<<<<<<< HEAD:MAIN4 - 복사본.py
             draw_text_lines(surface, left_lines, left_x, 225, 28)
 
             pygame.draw.rect(surface, (42, 42, 58), (405, 215, 210, 155), border_radius=10)
@@ -1138,6 +1303,30 @@ class GameController:
 
             draw_text_lines(surface, [(t, COLORS["민트"] if i == 0 else COLORS["화이트"]) for i, t in enumerate(item_lines)], right_x, 225, 21)
             draw_text_lines(surface, [(t, COLORS["민트"] if i == 0 else COLORS["화이트"]) for i, t in enumerate(trap_lines)], right_x, 395, 21)
+=======
+            for i, (text, color) in enumerate(left_lines):
+                if text == "": continue
+                surf = FONT_SMALL.render(text, True, color)
+                surface.blit(surf, (left_x, 225 + i * 28))
+
+            pygame.draw.rect(surface, (42, 42, 58), (405, 215, 210, 155), border_radius=10)
+            pygame.draw.rect(surface, (70, 90, 105), (405, 215, 210, 155), 1, border_radius=10)
+            pygame.draw.rect(surface, (42, 42, 58), (405, 385, 210, 135), border_radius=10)
+            pygame.draw.rect(surface, (70, 90, 105), (405, 385, 210, 135), 1, border_radius=10)
+
+            item_lines = ["아이템", "- 체력 회복", "- 적 제거", "- 속도 증가", "- 시야 확대", "- 적 정지", "- 시간 왜곡"]
+            trap_lines = ["함정", "- 생명 감소", "- 이동 속도 감소", "- 시야 제한", "- 상하좌우 반전"]
+
+            for i, text in enumerate(item_lines):
+                color = COLORS["민트"] if i == 0 else COLORS["화이트"]
+                surf = FONT_SMALL.render(text, True, color)
+                surface.blit(surf, (right_x, 225 + i * 21))
+
+            for i, text in enumerate(trap_lines):
+                color = COLORS["민트"] if i == 0 else COLORS["화이트"]
+                surf = FONT_SMALL.render(text, True, color)
+                surface.blit(surf, (right_x, 395 + i * 21))
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
 
         if self.state == "START":
             txt = FONT_BIG.render("< 도망쳐! 네모 미로 >", True, COLORS["노랑"])
@@ -1171,11 +1360,15 @@ class GameController:
 
             title_txt = "🎉 구역 돌파 및 탈출 성공!" if is_win else "💀 신호 차단 - 작전 실패"
             title_col = COLORS["출구"] if is_win else COLORS["빨강"]
+<<<<<<< HEAD:MAIN4 - 복사본.py
             title_surface = FONT_BIG.render(title_txt, True, title_col)
             title_rect = title_surface.get_rect(topleft=(110, 110))
             bg_rect = title_rect.inflate(24, 14)
             pygame.draw.rect(surface, (10, 10, 20), bg_rect, border_radius=8)
             surface.blit(title_surface, title_rect)
+=======
+            surface.blit(FONT_BIG.render(title_txt, True, title_col), (110, 110))
+>>>>>>> 69648d0802d7a4f5f02dfc5ad449e9c034e724b6:MAIN.py
 
             st_text = f"진입 섹터: 스테이지 {self.result_data.get('stage')}"
             df_text = f"설정 난이도: {self.result_data.get('diff')}"
