@@ -7,14 +7,14 @@ pygame.mixer.init()
 
 try:
     SOUNDS = {
-        "clear": pygame.mixer.Sound("clear.mp3"),
-        "monster": pygame.mixer.Sound("monster.mp3"),
-        "click": pygame.mixer.Sound("click.mp3"),
-        "gun": pygame.mixer.Sound("gun.mp3"),
-        "hit": pygame.mixer.Sound("hit.mp3"),
-        "coin": pygame.mixer.Sound("coin.mp3")
+        "clear": pygame.mixer.Sound("mp3/clear.mp3"),
+        "monster": pygame.mixer.Sound("mp3/monster.mp3"),
+        "click": pygame.mixer.Sound("mp3/click.mp3"),
+        "gun": pygame.mixer.Sound("mp3/gun.mp3"),
+        "hit": pygame.mixer.Sound("mp3/hit.mp3"),
+        "coin": pygame.mixer.Sound("mp3/coin.mp3")
     }
-    pygame.mixer.music.load("bgm.mp3")
+    pygame.mixer.music.load("mp3/bgm.mp3")
     pygame.mixer.music.play(-1)
 except Exception as e:
     print(f"사운드 파일을 찾을 수 없습니다: {e}")
@@ -27,7 +27,7 @@ clock = pygame.time.Clock()
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-START_IMAGE_FILE = os.path.join(BASE_DIR, "start_image.png")
+START_IMAGE_FILE = os.path.join(BASE_DIR, "image/start_image.png")
 
 def load_start_image(path, size):
     try:
@@ -40,8 +40,8 @@ def load_start_image(path, size):
         return None
 
 START_IMAGE = load_start_image(START_IMAGE_FILE, (WIDTH, HEIGHT))
-WIN_IMAGE_FILE = os.path.join(BASE_DIR, "win_image.png")
-LOSE_IMAGE_FILE = os.path.join(BASE_DIR, "lose_image.png")
+WIN_IMAGE_FILE = os.path.join(BASE_DIR, "image/win_image.png")
+LOSE_IMAGE_FILE = os.path.join(BASE_DIR, "image/lose_image.png")
 
 WIN_IMAGE = load_start_image(WIN_IMAGE_FILE, (WIDTH, HEIGHT))
 LOSE_IMAGE = load_start_image(LOSE_IMAGE_FILE, (WIDTH, HEIGHT))
@@ -61,10 +61,10 @@ COLORS = {
 }
 
 try:
-    FONT_BIG = pygame.font.SysFont("malgungothic", 42, bold=True)
-    FONT_MID = pygame.font.SysFont("malgungothic", 22, bold=True)
-    FONT_SMALL = pygame.font.SysFont("malgungothic", 15, bold=True)
-    FONT_TINY = pygame.font.SysFont("malgungothic", 13, bold=True)
+    FONT_BIG = pygame.font.SysFont("AppleGothic", 42, bold=True)
+    FONT_MID = pygame.font.SysFont("AppleGothic", 22, bold=True)
+    FONT_SMALL = pygame.font.SysFont("AppleGothic", 15, bold=True)
+    FONT_TINY = pygame.font.SysFont("AppleGothic", 13, bold=True)
 except:
     FONT_BIG = pygame.font.Font(None, 54)
     FONT_MID = pygame.font.Font(None, 30)
@@ -937,8 +937,13 @@ class GameScene:
             pygame.draw.circle(surface, col, (30 + i*30, 22), 10)
             pygame.draw.circle(surface, COLORS["화이트"], (30 + i*30, 22), 10, 1)
 
-        ammo_text = FONT_TINY.render(f"일반(WASD): {self.player.ammo_red} | 특수(Space): {self.player.ammo_blue}", True, COLORS["연그레이"])
-        surface.blit(ammo_text, (115, 15))
+        if self.difficulty != "Easy":
+            ammo_text = FONT_TINY.render(
+                f"일반(WASD): {self.player.ammo_red} | 특수(Space): {self.player.ammo_blue}",
+                True,
+                COLORS["연그레이"]
+            )
+            surface.blit(ammo_text, (115, 15))
 
         t_color = COLORS["빨강"] if self.time_left <= 25 else COLORS["화이트"]
         t_surf = FONT_MID.render(f"⏱ {self.time_left}s", True, t_color)
