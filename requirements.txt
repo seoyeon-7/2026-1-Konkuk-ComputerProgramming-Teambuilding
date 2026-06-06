@@ -1,0 +1,4 @@
+#터미널에서 다음 명령어를 실행해주세요
+#pip install -r requirements.txt
+pygame
+Pillow
