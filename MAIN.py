@@ -40,7 +40,7 @@ if SOUND_ENABLED:
 
 WIDTH, HEIGHT = 700, 700
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Maze Escape : Survival Protocol (듀얼 불렛 에디션)")
+pygame.display.set_caption("출구 없는 밤 : 생존 프로토콜 (듀얼 불렛 에디션)")
 clock = pygame.time.Clock()
 
 
@@ -79,10 +79,10 @@ COLORS = {
 }
 
 try:
-    FONT_BIG = pygame.font.SysFont("malgungothic", 42, bold=True)
-    FONT_MID = pygame.font.SysFont("malgungothic", 22, bold=True)
-    FONT_SMALL = pygame.font.SysFont("malgungothic", 15, bold=True)
-    FONT_TINY = pygame.font.SysFont("malgungothic", 13, bold=True) 
+    FONT_BIG = pygame.font.SysFont("AppleGothic", 42, bold=True)
+    FONT_MID = pygame.font.SysFont("AppleGothic", 22, bold=True)
+    FONT_SMALL = pygame.font.SysFont("AppleGothic", 15, bold=True)
+    FONT_TINY = pygame.font.SysFont("AppleGothic", 13, bold=True)
 except:
     FONT_BIG = pygame.font.Font(None, 54)
     FONT_MID = pygame.font.Font(None, 30)
@@ -558,8 +558,17 @@ class GameScene:
         return monsters
 
     def spawn_extra_monster(self):
+        alive_count = sum(1 for m in self.monsters if m.alive)
+        if alive_count >= 5:
+            return
         x, y = self._random_floor_pos(exclude_start=True)
-        m = Monster(x, y, "동그라미", speed=self.cfg["monster_speed"], is_chaser=False)
+        m = Monster(
+            x,
+            y,
+            "동그라미",
+            speed=self.cfg["monster_speed"],
+            is_chaser=False
+        )
         self.monsters.append(m)
 
     def _place_items_traps(self):
@@ -808,6 +817,7 @@ class GameScene:
 
         if spawn_interval:
             self.spawn_timer += 1
+
             if self.spawn_timer >= spawn_interval:
                 self.spawn_timer = 0
                 self.spawn_extra_monster()
@@ -993,28 +1003,47 @@ class GameScene:
 
         panel_x = WIDTH - 160
         pygame.draw.rect(surface, COLORS["패널"], (panel_x, 0, 160, HEIGHT))
+        alive_monsters = sum(
+            1 for m in self.monsters
+            if m.alive
+        )
         pygame.draw.line(surface, COLORS["연그레이"], (panel_x, 0), (panel_x, HEIGHT), 2)
 
-        surface.blit(FONT_SMALL.render("아이콘 종류 의미", True, COLORS["노랑"]), (panel_x + 12, 68))
+        monster_title = FONT_SMALL.render(
+            "현재 몬스터",
+            True,
+            COLORS["빨강"]
+        )
+
+        monster_count = FONT_MID.render(
+            f"{alive_monsters} / 5",
+            True,
+            COLORS["화이트"]
+        )
+
+        surface.blit(monster_title, (panel_x + 12, 20))
+        surface.blit(monster_count, (panel_x + 40, 42))
+
+        surface.blit(FONT_SMALL.render("아이콘 종류 의미", True, COLORS["노랑"]), (panel_x + 12, 95))
 
         pygame.draw.circle(surface, COLORS["아이템_원"], (panel_x + 20, 105), 7, 1)
         draw_shape(surface, "하트", (255, 100, 150), panel_x + 20, 105, 5)
-        surface.blit(FONT_TINY.render("체력 회복", True, COLORS["화이트"]), (panel_x + 36, 98))
+        surface.blit(FONT_TINY.render("체력 회복", True, COLORS["화이트"]), (panel_x + 36, 125))
 
         pygame.draw.circle(surface, COLORS["아이템_원"], (panel_x + 20, 130), 7, 1)
         draw_long_item_diamond(surface, panel_x + 20, 130, 5)
-        surface.blit(FONT_TINY.render("아이템", True, COLORS["화이트"]), (panel_x + 36, 123))
+        surface.blit(FONT_TINY.render("아이템", True, COLORS["화이트"]), (panel_x + 36, 150))
 
         pygame.draw.circle(surface, COLORS["함정_원"], (panel_x + 20, 155), 7, 2)
         draw_shape(surface, "세모", (50, 20, 20), panel_x + 20, 155, 4)
-        surface.blit(FONT_TINY.render("함정", True, COLORS["연그레이"]), (panel_x + 36, 148))
+        surface.blit(FONT_TINY.render("함정", True, COLORS["연그레이"]), (panel_x + 36, 175))
 
         pygame.draw.circle(surface, COLORS["빨강"], (panel_x + 20, 180), 7)
-        surface.blit(FONT_TINY.render("일반 탄약 (WASD)", True, COLORS["화이트"]), (panel_x + 36, 173))
+        surface.blit(FONT_TINY.render("일반 탄약 (WASD)", True, COLORS["화이트"]), (panel_x + 36, 200))
 
 
         pygame.draw.circle(surface, COLORS["파랑"], (panel_x + 20, 205), 7)
-        surface.blit(FONT_TINY.render("특수 탄약 (Space)", True, COLORS["화이트"]), (panel_x + 36, 198))
+        surface.blit(FONT_TINY.render("특수 탄약 (Space)", True, COLORS["화이트"]), (panel_x + 36, 225))
 
         if self.need_key:
             draw_key(surface, panel_x + 20, 245, 0.65)
@@ -1263,7 +1292,7 @@ class GameController:
             draw_text_lines(surface, [(t, COLORS["민트"] if i == 0 else COLORS["화이트"]) for i, t in enumerate(trap_lines)], right_x, 395, 21)
 
         if self.state == "START":
-            txt = FONT_BIG.render("< Maze Escape : Survival Protocol >", True, COLORS["노랑"])
+            txt = FONT_BIG.render("< 출구 없는 밤 : 생존 프로토콜 >", True, COLORS["노랑"])
             surface.blit(txt, txt.get_rect(center=(WIDTH//2, 140)))
 
 
