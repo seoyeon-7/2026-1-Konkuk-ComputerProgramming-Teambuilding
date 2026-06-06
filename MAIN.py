@@ -3,22 +3,40 @@ from collections import deque
 from PIL import Image
 
 pygame.init()
-pygame.mixer.init()
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+SOUNDS = {}
+SOUND_ENABLED = True
 try:
-    SOUNDS = {
-        "clear": pygame.mixer.Sound("mp3/clear.mp3"),
-        "monster": pygame.mixer.Sound("mp3/monster.mp3"),
-        "click": pygame.mixer.Sound("mp3/click.mp3"),
-        "gun": pygame.mixer.Sound("mp3/gun.mp3"),
-        "hit": pygame.mixer.Sound("mp3/hit.mp3"),
-        "coin": pygame.mixer.Sound("mp3/coin.mp3")
-    }
-    pygame.mixer.music.load("mp3/bgm.mp3")
-    pygame.mixer.music.play(-1)
+    pygame.mixer.init()
 except Exception as e:
-    print(f"사운드 파일을 찾을 수 없습니다: {e}")
-    SOUNDS = {}
+    print(f"사운드 장치를 초기화할 수 없습니다: {e}")
+    SOUND_ENABLED = False
+
+def load_sound(name, filename):
+    if not SOUND_ENABLED:
+        return
+    path = os.path.join(BASE_DIR, "mp3", filename)
+    try:
+        SOUNDS[name] = pygame.mixer.Sound(path)
+    except Exception as e:
+        print(f"사운드 파일을 건너뜁니다: {filename} ({e})")
+
+load_sound("clear", "clear.mp3")
+load_sound("monster", "monster.mp3")
+load_sound("click", "click.mp3")
+load_sound("gun", "gun.mp3")
+load_sound("hit", "hit.mp3")
+load_sound("coin", "coin.mp3")
+
+if SOUND_ENABLED:
+    bgm_path = os.path.join(BASE_DIR, "mp3", "bgm.mp3")
+    try:
+        pygame.mixer.music.load(bgm_path)
+        pygame.mixer.music.play(-1)
+    except Exception as e:
+        print(f"BGM 파일을 건너뜁니다: bgm.mp3 ({e})")
 
 WIDTH, HEIGHT = 700, 700
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -26,7 +44,6 @@ pygame.display.set_caption("Maze Escape : Survival Protocol (듀얼 불렛 에�
 clock = pygame.time.Clock()
 
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 START_IMAGE_FILE = os.path.join(BASE_DIR, "image/start_image.png")
 
 def load_start_image(path, size):
@@ -37,6 +54,7 @@ def load_start_image(path, size):
         data = img.tobytes()
         return pygame.image.fromstring(data, size, mode)
     except Exception as e:
+        print(f"이미지 파일을 건너뜁니다: {os.path.basename(path)} ({e})")
         return None
 
 START_IMAGE = load_start_image(START_IMAGE_FILE, (WIDTH, HEIGHT))
@@ -61,10 +79,10 @@ COLORS = {
 }
 
 try:
-    FONT_BIG = pygame.font.SysFont("AppleGothic", 42, bold=True)
-    FONT_MID = pygame.font.SysFont("AppleGothic", 22, bold=True)
-    FONT_SMALL = pygame.font.SysFont("AppleGothic", 15, bold=True)
-    FONT_TINY = pygame.font.SysFont("AppleGothic", 13, bold=True)
+    FONT_BIG = pygame.font.SysFont("malgungothic", 42, bold=True)
+    FONT_MID = pygame.font.SysFont("malgungothic", 22, bold=True)
+    FONT_SMALL = pygame.font.SysFont("malgungothic", 15, bold=True)
+    FONT_TINY = pygame.font.SysFont("malgungothic", 13, bold=True) 
 except:
     FONT_BIG = pygame.font.Font(None, 54)
     FONT_MID = pygame.font.Font(None, 30)
@@ -88,7 +106,7 @@ DIFFICULTY = {
     },
     "Hard": {
         "monsters": 3, "time": 250,
-        "trap_rate": 0.025, "item_rate": 0.030, "label": "어려움", "monster_speed": 1.9,
+        "trap_rate": 0.025, "item_rate": 0.038, "label": "어려움", "monster_speed": 1.9,
         "cols": 41, "rows": 41
     },
 }
@@ -392,7 +410,7 @@ class Monster:
 
     def draw(self, surface, ox, oy):
         if not self.alive: return
-        color = (231, 76, 60)  # 항상 빨간색
+        color = (231, 76, 60)  
         draw_shape(surface, self.shape, color, self.x - ox, self.y - oy, self.size)
 
 class Bullet:
@@ -421,7 +439,7 @@ class Bullet:
             self.radius
         )
 
-ITEM_TYPES = ["적처치", "속도증가", "시야확대", "적일시정지", "체력회복", "시간왜곡", "미니맵"]
+ITEM_TYPES = ["적처치", "속도증가", "시야확대", "적일시정지", "체력회복", "체력회복", "체력회복", "시간왜곡", "미니맵"]
 TRAP_TYPES = ["이동감소", "생명-1", "시야제한", "상하좌우반전"]
 
 class MapObject:
@@ -558,7 +576,8 @@ class GameScene:
                     elif roll < trap_r + item_r:
                         self.objects.append(MapObject(x, y, random.choice(ITEM_TYPES), is_trap=False))
 
-        for _ in range(3):
+        health_item_count = {"Easy": 6, "Normal": 7, "Hard": 11}[self.difficulty] + (self.stage // 2)
+        for _ in range(health_item_count):
             x, y = self._random_floor_pos(exclude_start=True)
             self.objects.append(MapObject(x, y, "체력회복", is_trap=False))
 
@@ -910,12 +929,14 @@ class GameScene:
 
         if self.difficulty == "Easy":
             vision = int(vision * 2.5)
+        elif self.difficulty == "Hard":
+            vision = int(vision * 1.15)
 
         px_screen, py_screen = self.player.x - ox, self.player.y - oy
 
         fog = pygame.Surface((PLAY_ZONE_W, HEIGHT - 45), pygame.SRCALPHA)
         if self.difficulty == "Easy":
-            fog_alpha = 100
+            fog_alpha = 130
         elif self.difficulty == "Normal":
             fog_alpha = 150
         else:
@@ -1289,11 +1310,6 @@ class GameController:
 
             title_txt = "🎉 구역 돌파 및 탈출 성공!" if is_win else "💀 신호 차단 - 작전 실패"
             title_col = COLORS["출구"] if is_win else COLORS["빨강"]
-            title_surface = FONT_BIG.render(title_txt, True, title_col)
-            title_rect = title_surface.get_rect(topleft=(110, 110))
-            bg_rect = title_rect.inflate(24, 14)
-            pygame.draw.rect(surface, (10, 10, 20), bg_rect, border_radius=8)
-            surface.blit(title_surface, title_rect)
 
             st_text = f"스테이지: {self.result_data.get('stage')}"
             df_text = f"설정 난이도: {self.result_data.get('diff')}"
@@ -1303,10 +1319,24 @@ class GameController:
             best_rec = self.save_data["best_time"].get(current_key)
             bs_text = f"최고 기록: {best_rec} 초" if best_rec else "최고 기록: 없음"
 
-            surface.blit(FONT_MID.render(df_text, True, COLORS["화이트"]), (180, 230))
-            surface.blit(FONT_MID.render(st_text, True, COLORS["화이트"]), (180, 275))
-            surface.blit(FONT_MID.render(tm_text, True, COLORS["노랑"]), (180, 320))
-            surface.blit(FONT_MID.render(bs_text, True, COLORS["빨강"]), (180, 380))
+            title_surface = FONT_BIG.render(title_txt, True, title_col)
+            surface.blit(title_surface, title_surface.get_rect(center=(WIDTH // 2, 120)))
+
+            panel_rect = pygame.Rect(110, 180, 480, 245)
+            pygame.draw.rect(surface, (10, 10, 20), panel_rect, border_radius=14)
+            pygame.draw.rect(surface, COLORS["연그레이"], panel_rect, 2, border_radius=14)
+
+            result_info = [
+                (df_text, COLORS["화이트"]),
+                (st_text, COLORS["화이트"]),
+                (tm_text, COLORS["노랑"]),
+                (bs_text, COLORS["빨강"])
+            ]
+
+            start_y = panel_rect.y + 35
+            for i, (text, color) in enumerate(result_info):
+                text_surface = FONT_MID.render(text, True, color)
+                surface.blit(text_surface, (panel_rect.x + 80, start_y + i * 45))
 
         for btn in self.buttons.get(self.state, []):
             btn.draw(surface)
