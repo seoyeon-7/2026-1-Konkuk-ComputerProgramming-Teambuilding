@@ -1026,28 +1026,28 @@ class GameScene:
 
         surface.blit(FONT_SMALL.render("아이콘 종류 의미", True, COLORS["노랑"]), (panel_x + 12, 95))
 
-        pygame.draw.circle(surface, COLORS["아이템_원"], (panel_x + 20, 105), 7, 1)
-        draw_shape(surface, "하트", (255, 100, 150), panel_x + 20, 105, 5)
+        pygame.draw.circle(surface, COLORS["아이템_원"], (panel_x + 20, 132), 7, 1)
+        draw_shape(surface, "하트", (255, 100, 150), panel_x + 20, 132, 5)
         surface.blit(FONT_TINY.render("체력 회복", True, COLORS["화이트"]), (panel_x + 36, 125))
 
-        pygame.draw.circle(surface, COLORS["아이템_원"], (panel_x + 20, 130), 7, 1)
-        draw_long_item_diamond(surface, panel_x + 20, 130, 5)
+        pygame.draw.circle(surface, COLORS["아이템_원"], (panel_x + 20, 157), 7, 1)
+        draw_long_item_diamond(surface, panel_x + 20, 157, 5)
         surface.blit(FONT_TINY.render("아이템", True, COLORS["화이트"]), (panel_x + 36, 150))
 
-        pygame.draw.circle(surface, COLORS["함정_원"], (panel_x + 20, 155), 7, 2)
-        draw_shape(surface, "세모", (50, 20, 20), panel_x + 20, 155, 4)
+        pygame.draw.circle(surface, COLORS["함정_원"], (panel_x + 20, 182), 7, 2)
+        draw_shape(surface, "세모", (50, 20, 20), panel_x + 20, 182, 4)
         surface.blit(FONT_TINY.render("함정", True, COLORS["연그레이"]), (panel_x + 36, 175))
 
-        pygame.draw.circle(surface, COLORS["빨강"], (panel_x + 20, 180), 7)
+        pygame.draw.circle(surface, COLORS["빨강"], (panel_x + 20, 207), 7)
         surface.blit(FONT_TINY.render("일반 탄약 (WASD)", True, COLORS["화이트"]), (panel_x + 36, 200))
 
 
-        pygame.draw.circle(surface, COLORS["파랑"], (panel_x + 20, 205), 7)
+        pygame.draw.circle(surface, COLORS["파랑"], (panel_x + 20, 232), 7)
         surface.blit(FONT_TINY.render("특수 탄약 (Space)", True, COLORS["화이트"]), (panel_x + 36, 225))
 
         if self.need_key:
-            draw_key(surface, panel_x + 20, 245, 0.65)
-            surface.blit(FONT_TINY.render("데이터 키(필수)", True, COLORS["열쇠"]), (panel_x + 36, 238))
+            draw_key(surface, panel_x + 20, 272, 0.65)
+            surface.blit(FONT_TINY.render("탈출 열쇠", True, COLORS["열쇠"]), (panel_x + 36, 265))
 
         self.draw_minimap(surface, panel_x + 12, 285)
 
