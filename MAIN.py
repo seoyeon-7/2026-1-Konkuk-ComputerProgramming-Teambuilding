@@ -1349,7 +1349,7 @@ class GameController:
             preview = pygame.Rect(40, 120, 260, 420)
             pygame.draw.rect(surface, (30, 30, 45), preview, border_radius=12)
             pygame.draw.rect(surface, COLORS["연그레이"], preview, 2, border_radius=12)
-            title = FONT_BIG.render("CUSTOMIZE", True, COLORS["노랑"])
+            title = FONT_BIG.render("커스터마이즈", True, COLORS["노랑"])
             surface.blit(title, title.get_rect(center=(WIDTH // 2, 70)))
             draw_shape(
                 surface,
@@ -1359,22 +1359,22 @@ class GameController:
                 preview.centery,
                 40
             )
-            info1 = FONT_SMALL.render(f"SHAPE: {self.character_shape}", True, COLORS["화이트"])
-            info2 = FONT_SMALL.render("COLOR SELECTED", True, self.character_color)
+            info1 = FONT_SMALL.render(f"선택된 모양: {self.character_shape}", True, COLORS["화이트"])
+            info2 = FONT_SMALL.render("선택된 색", True, self.character_color)
             surface.blit(info1, (preview.x + 20, preview.y + 320))
             surface.blit(info2, (preview.x + 20, preview.y + 350))
             panel = pygame.Rect(330, 120, 330, 420)
             pygame.draw.rect(surface, (25, 25, 38), panel, border_radius=12)
             pygame.draw.rect(surface, COLORS["연그레이"], panel, 2, border_radius=12)
-            label = FONT_MID.render("SELECT SHAPE / COLOR", True, COLORS["민트"])
+            label = FONT_MID.render("모양 / 색 선택", True, COLORS["민트"])
             surface.blit(label, (panel.x + 20, panel.y + 20))
 
         elif self.state == "DIFFICULTY":
-            txt = FONT_BIG.render("작전 난이도 선택", True, COLORS["화이트"])
+            txt = FONT_BIG.render("난이도 선택", True, COLORS["화이트"])
             surface.blit(txt, txt.get_rect(center=(WIDTH//2, 120)))
 
         elif self.state == "STAGE":
-            txt = FONT_BIG.render(f"진입 구역 ({self.selected_difficulty})", True, COLORS["민트"])
+            txt = FONT_BIG.render(f"스테이지 선택 ({self.selected_difficulty})", True, COLORS["민트"])
             surface.blit(txt, txt.get_rect(center=(WIDTH//2, 140)))
 
             for i in range(5):
@@ -1403,7 +1403,7 @@ class GameController:
             else:
                 surface.fill(COLORS["HUD_BG"])
 
-            title_txt = "구역 돌파 및 탈출 성공!" if is_win else "신호 차단 - 작전 실패"
+            title_txt = "탈출 성공!" if is_win else "탈출 실패!"
             title_col = COLORS["출구"] if is_win else COLORS["빨강"]
 
             st_text = f"스테이지: {self.result_data.get('stage')}"
