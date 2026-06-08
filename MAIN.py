@@ -68,12 +68,12 @@ LOSE_IMAGE = load_start_image(LOSE_IMAGE_FILE, (WIDTH, HEIGHT))
 SAVE_FILE = "maze_save.json"
 
 COLORS = {
-    "빨강": (220, 50, 50), "주황": (255, 165, 0), "노랑": (255, 220, 0), 
-    "초록": (34, 160, 34), "파랑": (30, 80, 220), "남색": (0, 0, 128), 
+    "빨강": (220, 50, 50), "주황": (255, 165, 0), "노랑": (255, 220, 0),
+    "초록": (34, 160, 34), "파랑": (30, 80, 220), "남색": (0, 0, 128),
     "보라": (128, 0, 180), "핑크": (255, 100, 180), "민트": (62, 180, 137),
     "차콜": (54, 69, 79), "화이트": (255, 255, 255), "블랙": (10, 10, 10),
     "그레이": (150, 150, 150), "연그레이": (220, 220, 220),
-    "벽": (50, 65, 85), "바닥": (240, 244, 248), "출구": (46, 204, 113), 
+    "벽": (50, 65, 85), "바닥": (240, 244, 248), "출구": (46, 204, 113),
     "열쇠": (241, 196, 15), "HUD_BG": (20, 20, 30), "패널": (25, 25, 35),
     "아이템_원": (52, 152, 219), "함정_원": (231, 76, 60)
 }
@@ -209,8 +209,8 @@ def draw_key(surface, cx, cy, scale=1.0):
 
 def draw_long_item_diamond(surface, cx, cy, r):
     cx, cy, r = int(cx), int(cy), float(r)
-    outer_color = (255, 235, 59)  
-    inner_color = (255, 248, 180) 
+    outer_color = (255, 235, 59)
+    inner_color = (255, 248, 180)
     outline = COLORS["블랙"]
 
     outer_pts = [
@@ -296,12 +296,12 @@ class Player:
         self.hit_blindness = 0
         self.reverse_timer = 0
         self.size = 9.0
-        
+
         self.last_dx = 1
         self.last_dy = 0
-        
-        self.ammo_red = 2   
-        self.ammo_blue = 0  
+
+        self.ammo_red = 2
+        self.ammo_blue = 0
 
     def move(self, dx, dy, maze, tile):
         spd = self.speed
@@ -410,7 +410,7 @@ class Monster:
 
     def draw(self, surface, ox, oy):
         if not self.alive: return
-        color = (231, 76, 60)  
+        color = (231, 76, 60)
         draw_shape(surface, self.shape, color, self.x - ox, self.y - oy, self.size)
 
 class Bullet:
@@ -424,7 +424,7 @@ class Bullet:
         self.speed = 8
         self.radius = 5
         self.alive = True
-        self.type = bullet_type  
+        self.type = bullet_type
 
     def update(self):
         self.x += self.dx * self.speed
@@ -473,20 +473,20 @@ class AmmoItem:
         self.y = y
         self.alive = True
         self.size = 10
-        self.type = ammo_type 
+        self.type = ammo_type
 
     def draw(self, surface, ox, oy):
         if not self.alive: return
         tx = self.x - ox
         ty = self.y - oy
-        
+
         bg_color = COLORS["빨강"] if self.type == "red" else COLORS["파랑"]
         label = "R" if self.type == "red" else "B"
         text_color = COLORS["화이트"]
-        
+
         pygame.draw.circle(surface, bg_color, (int(tx), int(ty)), self.size)
         pygame.draw.circle(surface, (0, 0, 0), (int(tx), int(ty)), self.size, 2)
-        
+
         text = FONT_TINY.render(label, True, text_color)
         rect = text.get_rect(center=(tx, ty))
         surface.blit(text, rect)
@@ -612,7 +612,7 @@ class GameScene:
             self.ox += random.randint(-self.shake_intensity, self.shake_intensity)
             self.oy += random.randint(-self.shake_intensity, self.shake_intensity)
             self.shake_intensity -= 1
-            
+
     def _check_collisions(self):
         p = self.player
         pr = p.size
@@ -705,28 +705,28 @@ class GameScene:
                     self._show_msg("크리티컬 히트! 몬스터 충돌")
 
         if p.hp <= 0: self.result = "LOSE"
-            
+
     def _show_msg(self, text):
         self.msg = text
         self.msg_timer = 100
 
     def shoot_bullet(self, bullet_type, dx=0, dy=0):
-        if self.shoot_cooldown > 0: 
+        if self.shoot_cooldown > 0:
             return
-        
+
         p = self.player
-        
+
         if bullet_type == "red":
             if p.ammo_red <= 0:
                 self._show_msg("일반 탄약 부족")
                 return
             p.ammo_red -= 1
-            
-            if dx == 0 and dy == 0:  
+
+            if dx == 0 and dy == 0:
                 dx, dy = p.last_dx, p.last_dy
-            if dx == 0 and dy == 0: 
+            if dx == 0 and dy == 0:
                 dx = 1
-                
+
             b = Bullet(p.x + dx*15, p.y + dy*15, dx, dy, "red")
             self.bullets.append(b)
             if "gun" in SOUNDS: SOUNDS["gun"].play()
@@ -737,16 +737,16 @@ class GameScene:
                 self._show_msg("특수 파괴 탄약 부족")
                 return
             p.ammo_blue -= 1
-            
+
             dx, dy = p.last_dx, p.last_dy
-            if dx == 0 and dy == 0: 
+            if dx == 0 and dy == 0:
                 dx = 1
-                
+
             b = Bullet(p.x + dx*15, p.y + dy*15, dx, dy, "blue")
             self.bullets.append(b)
             if "gun" in SOUNDS: SOUNDS["gun"].play()
             self.shoot_cooldown = 15
-    
+
 
     def update(self, keys):
         if self.result: return
@@ -776,7 +776,7 @@ class GameScene:
 
         for bullet in self.bullets:
             if not bullet.alive: continue
-            
+
             col = int(bullet.x // self.TILE)
             row = int(bullet.y // self.TILE)
 
@@ -1047,7 +1047,7 @@ class GameScene:
 
         if self.need_key:
             draw_key(surface, panel_x + 20, 272, 0.65)
-            surface.blit(FONT_TINY.render("탈출 열쇠", True, COLORS["열쇠"]), (panel_x + 36, 265))
+            surface.blit(FONT_TINY.render("탈출 열", True, COLORS["열쇠"]), (panel_x + 36, 265))
 
         self.draw_minimap(surface, panel_x + 12, 285)
 
@@ -1326,8 +1326,26 @@ class GameController:
             surface.blit(txt, txt.get_rect(center=(WIDTH//2, 120)))
 
         elif self.state == "STAGE":
-            txt = FONT_BIG.render(f"진입 구역 섹터 해금 ({self.selected_difficulty})", True, COLORS["민트"])
+            txt = FONT_BIG.render(f"진입 구역 ({self.selected_difficulty})", True, COLORS["민트"])
             surface.blit(txt, txt.get_rect(center=(WIDTH//2, 140)))
+
+            for i in range(5):
+                key = f"{self.selected_difficulty}_{i + 1}"
+                best = self.save_data["best_time"].get(key)
+
+                bx = 80 + i * 110
+                by = 280
+
+                if best is None:
+                    text = "기록 없음"
+                    color = COLORS["그레이"]
+                else:
+                    text = f"{best}s"
+                    color = COLORS["노랑"]
+
+                rec = FONT_TINY.render(text, True, color)
+                surface.blit(rec, rec.get_rect(center=(bx + 45, by + 95)))
+
 
         elif self.state == "RESULT":
             is_win = self.result_data.get("result") == "WIN"
@@ -1337,7 +1355,7 @@ class GameController:
             else:
                 surface.fill(COLORS["HUD_BG"])
 
-            title_txt = "🎉 구역 돌파 및 탈출 성공!" if is_win else "💀 신호 차단 - 작전 실패"
+            title_txt = "🎉 구역 돌파 및 탈출 성공!" if is_win else "신호 차단 - 작전 실패"
             title_col = COLORS["출구"] if is_win else COLORS["빨강"]
 
             st_text = f"스테이지: {self.result_data.get('stage')}"
