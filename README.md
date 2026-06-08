@@ -69,7 +69,25 @@ git clone <repository-url>
 pip install -r requirements.txt
 ```
 
-3. 게임을 실행합니다.
+3. 실행환경에 따라 폰트를 변경합니다.
+
+```bash
+# Mac
+try:
+    FONT_BIG = pygame.font.SysFont("AppleGothic", 42, bold=True)
+    FONT_MID = pygame.font.SysFont("AppleGothic", 22, bold=True)
+    FONT_SMALL = pygame.font.SysFont("AppleGothic", 15, bold=True)
+    FONT_TINY = pygame.font.SysFont("AppleGothic", 13, bold=True)
+
+# Window
+try:
+    FONT_BIG = pygame.font.SysFont("malgungothic", 42, bold=True)
+    FONT_MID = pygame.font.SysFont("malgungothic", 22, bold=True)
+    FONT_SMALL = pygame.font.SysFont("malgungothic", 15, bold=True)
+    FONT_TINY = pygame.font.SysFont("malgungothic", 13, bold=True)
+```
+
+4. 게임을 실행합니다.
 
 ```bash
 MAIN.py
