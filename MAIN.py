@@ -1098,6 +1098,7 @@ class GameController:
         self.result_data = {}
         self.save_data = load_game_data()
         self._build_buttons()
+        self.paused = False
 
     def _set(self, s):
         self.state = s
@@ -1108,7 +1109,7 @@ class GameController:
         self.state = "PLAY"
 
     def _build_buttons(self):
-        self.buttons = {"START": [], "CUSTOM": [], "HELP": [], "DIFFICULTY": [], "STAGE": [], "RESULT": []}
+        self.buttons = {"START": [], "CUSTOM": [], "HELP": [], "DIFFICULTY": [], "STAGE": [], "RESULT": [], "PAUSE": []}
 
         if self.state == "START":
             start_buttons = [
@@ -1195,6 +1196,30 @@ class GameController:
             for x, label, bg, fg, cb in result_buttons:
                 self.buttons["RESULT"].append(Button(x, 480, 200, 55, label, bg, fg, cb))
 
+        elif self.state == "PAUSE":
+
+            self.buttons["PAUSE"].append(
+                Button(
+                    250, 300,
+                    200, 50,
+                    "게임 계속",
+                    COLORS["민트"],
+                    COLORS["화이트"],
+                    self.resume_game
+                )
+            )
+
+            self.buttons["PAUSE"].append(
+                Button(
+                    250, 380,
+                    200, 50,
+                    "메인 화면",
+                    COLORS["빨강"],
+                    COLORS["화이트"],
+                    self.quit_to_menu
+                )
+            )
+
     def _next_stage_go(self):
         self.selected_stage = min(5, self.result_data.get("stage", 1) + 1)
         self._start_game()
@@ -1225,6 +1250,9 @@ class GameController:
 
         if self.state == "PLAY" and self.scene:
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self._set("PAUSE")
+                    return
                 if self.scene.difficulty != "Easy":
                     shoot_keys = {
                         pygame.K_w: ("red", 0, -1),
@@ -1242,6 +1270,10 @@ class GameController:
 
     def update(self):
         if self.state == "PLAY" and self.scene:
+
+            if self.paused:
+                return
+
             keys = pygame.key.get_pressed()
             self.scene.update(keys)
 
@@ -1254,6 +1286,22 @@ class GameController:
         if self.state == "PLAY" and self.scene:
             self.scene.draw(surface)
             return
+
+        elif self.state == "PAUSE":
+
+            if self.scene:
+                self.scene.draw(surface)
+
+            overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 170))
+            surface.blit(overlay, (0, 0))
+
+            title = FONT_BIG.render("일시정지", True, COLORS["화이트"])
+            surface.blit(
+                title,
+                title.get_rect(center=(WIDTH // 2, 180))
+            )
+
         elif self.state == "HELP":
             title = FONT_BIG.render("게임 설명", True, COLORS["노랑"])
             surface.blit(title, title.get_rect(center=(WIDTH // 2, 80)))
@@ -1276,7 +1324,7 @@ class GameController:
             left_lines = [
                 ("게임 목표", COLORS["민트"]), ("- 열쇠 획득 후 탈출하세요 (ST 2~5)", COLORS["화이트"]), ("- 총알로 적을 처치할 수 있습니다 (N/H)", COLORS["화이트"]),
                 ("- 특수 총알은 벽 파괴 가능합니다 (N/H)", COLORS["화이트"]), ("- 기본 생명은 3개입니다", COLORS["화이트"]), ("- 함정/아이템/생명/탄약을 찾아보세요", COLORS["화이트"]), ("", COLORS["화이트"]), ("조작법", COLORS["민트"]), ("- 화살표 방향키 : 이동", COLORS["화이트"]),
-                ("- WASD : 일반 총알", COLORS["화이트"]), ("- SPACE : 벽 파괴 총알", COLORS["화이트"])
+                ("- WASD : 일반 / SPACE : 벽 파괴 총알", COLORS["화이트"]), ("- ESC : 게임 일시 정지", COLORS["화이트"])
             ]
             draw_text_lines(surface, left_lines, left_x, 225, 28)
 
@@ -1355,7 +1403,7 @@ class GameController:
             else:
                 surface.fill(COLORS["HUD_BG"])
 
-            title_txt = "🎉 구역 돌파 및 탈출 성공!" if is_win else "신호 차단 - 작전 실패"
+            title_txt = "구역 돌파 및 탈출 성공!" if is_win else "신호 차단 - 작전 실패"
             title_col = COLORS["출구"] if is_win else COLORS["빨강"]
 
             st_text = f"스테이지: {self.result_data.get('stage')}"
@@ -1369,7 +1417,8 @@ class GameController:
             title_surface = FONT_BIG.render(title_txt, True, title_col)
             surface.blit(title_surface, title_surface.get_rect(center=(WIDTH // 2, 120)))
 
-            panel_rect = pygame.Rect(110, 180, 480, 245)
+            panel_rect = pygame.Rect(0, 0, 300, 190)
+            panel_rect.center = (WIDTH // 2, 300)
             pygame.draw.rect(surface, (10, 10, 20), panel_rect, border_radius=14)
             pygame.draw.rect(surface, COLORS["연그레이"], panel_rect, 2, border_radius=14)
 
@@ -1380,13 +1429,30 @@ class GameController:
                 (bs_text, COLORS["빨강"])
             ]
 
-            start_y = panel_rect.y + 35
+            start_y = panel_rect.y + 25
+
             for i, (text, color) in enumerate(result_info):
                 text_surface = FONT_MID.render(text, True, color)
-                surface.blit(text_surface, (panel_rect.x + 80, start_y + i * 45))
+
+                surface.blit(
+                    text_surface,
+                    (
+                        panel_rect.left + 40,
+                        start_y + i * 35
+                    )
+                )
 
         for btn in self.buttons.get(self.state, []):
             btn.draw(surface)
+
+    def resume_game(self):
+        self.paused = False
+        self.state = "PLAY"
+
+    def quit_to_menu(self):
+        self.paused = False
+        self.scene = None
+        self._set("START")
 
 controller = GameController()
 
