@@ -880,6 +880,7 @@ class GameScene:
                 my = int(map_y + (m.y / self.TILE) * scale)
                 pygame.draw.circle(surface, COLORS["빨강"], (mx, my), 2)
 
+
         px = int(map_x + (self.player.x / self.TILE) * scale)
         py = int(map_y + (self.player.y / self.TILE) * scale)
         pygame.draw.circle(surface, COLORS["메인"], (px, py), 3)
@@ -966,9 +967,13 @@ class GameScene:
         elapsed_time = self.frame_count // 60
         pygame.draw.line(surface, COLORS["그레이"], (0, 45), (PLAY_ZONE_W, 45), 2)
         for i in range(3):
-            col = COLORS["빨강"] if i < self.player.hp else (40, 40, 45)
-            pygame.draw.circle(surface, col, (30 + i*30, 22), 10)
-            pygame.draw.circle(surface, COLORS["화이트"], (30 + i*30, 22), 10, 1)
+            cx = 30 + i * 30
+            cy = 22
+
+            if i < self.player.hp:
+                draw_shape(surface, "하트", COLORS["빨강"], cx, cy, 10)
+            else:
+                draw_shape(surface, "하트", COLORS["화이트"], cx, cy, 10)
 
         if self.difficulty != "Easy":
             ammo_red_text = FONT_TINY.render(
@@ -997,7 +1002,7 @@ class GameScene:
             True,
             COLORS["화이트"]
         )
-        surface.blit(elapsed_text, (255, hud_y - 9))
+        surface.blit(elapsed_text, (340, hud_y - 9))
 
         info = FONT_SMALL.render(f"ST {self.stage} | {self.cfg['label']}", True, COLORS["연그레이"])
         surface.blit(info, info.get_rect(midright=(PLAY_ZONE_W - 15, 22)))
@@ -1023,7 +1028,7 @@ class GameScene:
         )
 
         surface.blit(monster_title, (panel_x + 12, 20))
-        surface.blit(monster_count, (panel_x + 40, 42))
+        surface.blit(monster_count, (panel_x + 12, 42))
 
         surface.blit(FONT_SMALL.render("아이콘 종류 의미", True, COLORS["노랑"]), (panel_x + 12, 95))
 
@@ -1065,7 +1070,7 @@ class GameScene:
 
         if self.msg_timer > 0:
             ms = FONT_MID.render(self.msg, True, COLORS["노랑"])
-            msg_rect = ms.get_rect(center=(PLAY_ZONE_W//2, HEIGHT//2 - 100))
+            msg_rect = ms.get_rect(center=(PLAY_ZONE_W//2, HEIGHT//2 - 378))
             pygame.draw.rect(surface, (10,10,20,180), msg_rect.inflate(20, 10), border_radius=6)
             surface.blit(ms, msg_rect)
 
@@ -1204,7 +1209,7 @@ class GameController:
 
         elif self.state == "RESULT":
             is_win = self.result_data.get("result") == "WIN"
-            result_buttons = [(250, "메인 화면 이동", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("START"))]
+            result_buttons = [(WIDTH//2-100, "메인 화면 이동", COLORS["블랙"], COLORS["메인"], lambda: self._set("START"))]
             if is_win and self.result_data.get("stage", 1) < 5:
                 result_buttons = [
                     (180, "다음 스테이지", (9, 17, 13), COLORS["메인"], self._next_stage_go),
@@ -1420,8 +1425,7 @@ class GameController:
             title_txt = "탈출 성공!" if is_win else "탈출 실패!"
             title_col = COLORS["출구"] if is_win else COLORS["빨강"]
 
-            st_text = f"스테이지: {self.result_data.get('stage')}"
-            df_text = f"설정 난이도: {self.result_data.get('diff')}"
+            df_text = f"스테이지: {self.result_data.get('diff')} {self.result_data.get('stage')}"
             tm_text = f"소요 시간: {self.result_data.get('time')} 초" if is_win else "기록 합산 불가"
 
             current_key = f"{self.result_data.get('diff')}_{self.result_data.get('stage')}"
@@ -1429,16 +1433,15 @@ class GameController:
             bs_text = f"최고 기록: {best_rec} 초" if best_rec else "최고 기록: 없음"
 
             title_surface = FONT_BIG.render(title_txt, True, title_col)
-            surface.blit(title_surface, title_surface.get_rect(center=(WIDTH // 2, 120)))
+            surface.blit(title_surface, title_surface.get_rect(center=(WIDTH // 2, 150)))
 
-            panel_rect = pygame.Rect(0, 0, 300, 190)
-            panel_rect.center = (WIDTH // 2, 300)
-            pygame.draw.rect(surface, (10, 10, 20), panel_rect, border_radius=14)
+            panel_rect = pygame.Rect(0, 0, 300, 130)
+            panel_rect.center = (WIDTH // 2, 500)
+            pygame.draw.rect(surface, (9, 17, 13), panel_rect, border_radius=14)
             pygame.draw.rect(surface, COLORS["메인"], panel_rect, 2, border_radius=14)
 
             result_info = [
                 (df_text, COLORS["화이트"]),
-                (st_text, COLORS["화이트"]),
                 (tm_text, COLORS["노랑"]),
                 (bs_text, COLORS["빨강"])
             ]
@@ -1451,8 +1454,8 @@ class GameController:
                 surface.blit(
                     text_surface,
                     (
-                        panel_rect.left + 40,
-                        start_y + i * 35
+                        panel_rect.left + 55,
+                        start_y + i * 35 - 5
                     )
                 )
 
@@ -1476,10 +1479,6 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_1:
-                pygame.quit()
-                sys.exit()
         controller.handle_event(event)
 
     controller.update()

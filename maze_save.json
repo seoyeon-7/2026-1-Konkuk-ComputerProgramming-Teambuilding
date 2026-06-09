@@ -12,7 +12,7 @@
         "Normal_5": true,
         "Hard_1": true,
         "Hard_2": true,
-        "Hard_3": false,
+        "Hard_3": true,
         "Hard_4": false,
         "Hard_5": false
     },
@@ -26,9 +26,9 @@
         "Normal_2": 54,
         "Normal_3": 54,
         "Normal_4": 59,
-        "Normal_5": null,
+        "Normal_5": 46,
         "Hard_1": 42,
-        "Hard_2": null,
+        "Hard_2": 99,
         "Hard_3": null,
         "Hard_4": null,
         "Hard_5": null
