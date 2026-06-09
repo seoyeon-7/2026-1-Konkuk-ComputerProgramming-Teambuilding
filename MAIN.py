@@ -38,8 +38,8 @@ if SOUND_ENABLED:
     except Exception as e:
         print(f"BGM 파일을 건너뜁니다: bgm.mp3 ({e})")
 
-WIDTH, HEIGHT = 700, 700
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+WIDTH, HEIGHT = screen.get_size()
 pygame.display.set_caption("출구 없는 밤 : 생존 프로토콜 (듀얼 불렛 에디션)")
 clock = pygame.time.Clock()
 
@@ -492,7 +492,7 @@ class AmmoItem:
         surface.blit(text, rect)
 
 class GameScene:
-    TILE = 26
+    TILE = 40
 
     def __init__(self, difficulty, stage, shape, color, controller):
         self.ctrl = controller
@@ -1138,7 +1138,7 @@ class GameController:
                 (400, "게임 설명", (155, 89, 182), "HELP")
             ]
             for y, label, bg, target in start_buttons:
-                self.buttons["START"].append(Button(240, y, 220, 55, label, bg, COLORS["화이트"], lambda t=target: self._set(t)))
+                self.buttons["START"].append(Button(WIDTH // 2 - 100, y, 220, 55, label, bg, COLORS["화이트"], lambda t=target: self._set(t)))
 
 
         elif self.state == "CUSTOM":
@@ -1194,16 +1194,21 @@ class GameController:
                 (370, "Hard (어려움)", "Hard", (192, 41, 43), COLORS["화이트"])
             ]
             for y, label, diff, bg, fg in diff_buttons:
-                self.buttons["DIFFICULTY"].append(Button(240, y, 220, 55, label, bg, fg, lambda d=diff: (setattr(self, "selected_difficulty", d), self._set("STAGE"))))
-            self.buttons["DIFFICULTY"].append(Button(240, 480, 220, 48, "이전 화면으로", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("START")))
+                self.buttons["DIFFICULTY"].append(Button(WIDTH // 2 - 100, y, 220, 55, label, bg, fg, lambda d=diff: (setattr(self, "selected_difficulty", d), self._set("STAGE"))))
+            self.buttons["DIFFICULTY"].append(Button(WIDTH // 2 - 100, 480, 220, 48, "이전 화면으로", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("START")))
 
         elif self.state == "STAGE":
+            button_width = 90
+            gap = 20
+
+            total_width = button_width * 5 + gap * 4
+            start_x = (WIDTH - total_width) // 2
             for i in range(5):
-                bx = 80 + i * 110
+                bx = start_x + i * (button_width + gap)
                 by = 280
                 is_enabled = self.save_data["unlocked"].get(f"{self.selected_difficulty}_{i+1}", False)
                 self.buttons["STAGE"].append(Button(bx, by, 90, 80, f"ST {i+1}", (41, 128, 185), COLORS["화이트"], (lambda n: lambda: (setattr(self,'selected_stage',n), self._start_game()))(i+1), enabled=is_enabled))
-            self.buttons["STAGE"].append(Button(240, 450, 220, 48, "난이도 재선택", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("DIFFICULTY")))
+            self.buttons["STAGE"].append(Button(WIDTH // 2 - 100, 450, 220, 48, "난이도 재선택", COLORS["연그레이"], COLORS["블랙"], lambda: self._set("DIFFICULTY")))
 
         elif self.state == "RESULT":
             is_win = self.result_data.get("result") == "WIN"
@@ -1218,27 +1223,9 @@ class GameController:
 
         elif self.state == "PAUSE":
 
-            self.buttons["PAUSE"].append(
-                Button(
-                    250, 300,
-                    200, 50,
-                    "게임 계속",
-                    COLORS["민트"],
-                    COLORS["화이트"],
-                    self.resume_game
-                )
-            )
+            self.buttons["PAUSE"].append(Button(WIDTH // 2 - 100, 300, 200, 50, "게임 계속", COLORS["민트"], COLORS["화이트"], self.resume_game))
 
-            self.buttons["PAUSE"].append(
-                Button(
-                    250, 380,
-                    200, 50,
-                    "메인 화면",
-                    COLORS["빨강"],
-                    COLORS["화이트"],
-                    self.quit_to_menu
-                )
-            )
+            self.buttons["PAUSE"].append(Button(WIDTH // 2 - 100, 380, 200, 50, "메인 화면", COLORS["빨강"], COLORS["화이트"], self.quit_to_menu))
 
     def _next_stage_go(self):
         self.selected_stage = min(5, self.result_data.get("stage", 1) + 1)
@@ -1397,11 +1384,17 @@ class GameController:
             txt = FONT_BIG.render(f"스테이지 선택 ({self.selected_difficulty})", True, COLORS["민트"])
             surface.blit(txt, txt.get_rect(center=(WIDTH//2, 140)))
 
+            button_width = 90
+            gap = 20
+
+            total_width = button_width * 5 + gap * 4
+            start_x = (WIDTH - total_width) // 2
+
             for i in range(5):
                 key = f"{self.selected_difficulty}_{i + 1}"
                 best = self.save_data["best_time"].get(key)
 
-                bx = 80 + i * 110
+                bx = start_x + i * (button_width + gap)
                 by = 280
 
                 if best is None:
@@ -1481,6 +1474,11 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_1:
+                pygame.quit()
+                sys.exit()
         controller.handle_event(event)
 
     controller.update()
