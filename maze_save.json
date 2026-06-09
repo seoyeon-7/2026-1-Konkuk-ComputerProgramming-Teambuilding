@@ -11,7 +11,7 @@
         "Normal_4": true,
         "Normal_5": true,
         "Hard_1": true,
-        "Hard_2": false,
+        "Hard_2": true,
         "Hard_3": false,
         "Hard_4": false,
         "Hard_5": false
@@ -27,7 +27,7 @@
         "Normal_3": 54,
         "Normal_4": 59,
         "Normal_5": null,
-        "Hard_1": null,
+        "Hard_1": 42,
         "Hard_2": null,
         "Hard_3": null,
         "Hard_4": null,

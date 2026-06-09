@@ -107,3 +107,6 @@ project/
 ## 7. 마치며
 
 본 프로젝트는 건국대학교 컴퓨터프로그래밍 과제로 제작되었습니다.
+
+사운드 출처 : https://pixabay.com/ko/sound-effects/search/game/
+GitHub : https://github.com/seoyeon-7/2026-1-Konkuk-ComputerProgramming-Teambuilding.git

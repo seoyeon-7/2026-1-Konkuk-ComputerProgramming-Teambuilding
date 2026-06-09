@@ -78,7 +78,7 @@ COLORS = {
     "아이템_원": (52, 152, 219), "함정_원": (231, 76, 60)
 }
 
-try:
+try:    #"malgungothic"
     FONT_BIG = pygame.font.SysFont("AppleGothic", 42, bold=True)
     FONT_MID = pygame.font.SysFont("AppleGothic", 22, bold=True)
     FONT_SMALL = pygame.font.SysFont("AppleGothic", 15, bold=True)
@@ -106,7 +106,7 @@ DIFFICULTY = {
     },
     "Hard": {
         "monsters": 3, "time": 250,
-        "trap_rate": 0.025, "item_rate": 0.038, "label": "어려움", "monster_speed": 1.9,
+        "trap_rate": 0.025, "item_rate": 0.055, "label": "어려움", "monster_speed": 1.9,
         "cols": 41, "rows": 41
     },
 }
@@ -342,7 +342,7 @@ class Player:
     def take_damage(self):
         if self.invincible == 0:
             self.hp -= 1
-            self.invincible = 90
+            self.invincible = 180
             self.hit_blindness = 60
             return True
         return False
@@ -590,12 +590,17 @@ class GameScene:
             x, y = self._random_floor_pos(exclude_start=True)
             self.objects.append(MapObject(x, y, "체력회복", is_trap=False))
 
-        if self.difficulty != "Easy":
+        if self.difficulty == "Normal":
             ammo_count = 4
-            for i in range(ammo_count):
-                x, y = self._random_floor_pos(exclude_start=True)
-                a_type = "red" if i % 2 == 0 else "blue"
-                self.ammo_items.append(AmmoItem(x, y, ammo_type=a_type))
+        elif self.difficulty == "Hard":
+            ammo_count = 8
+        else:
+            ammo_count = 0
+
+        for i in range(ammo_count):
+            x, y = self._random_floor_pos(exclude_start=True)
+            a_type = "red" if i % 2 == 0 else "blue"
+            self.ammo_items.append(AmmoItem(x, y, ammo_type=a_type))
 
     def _camera(self):
         PLAY_ZONE_W = WIDTH - 160
@@ -661,8 +666,12 @@ class GameScene:
                         for m in self.monsters: m.stun = 180
                         self._show_msg("시공간 정지! 적 행동 불능")
                     elif obj.kind == "시간왜곡":
-                        self.time_warp_timer = 180
-                        self._show_msg("시간 왜곡! 3초 동안 타이머가 느려집니다")
+                        if self.difficulty in ["Normal", "Hard"]:
+                            self.time_warp_timer = 300
+                            self._show_msg("시간 왜곡! 5초 동안 타이머가 느려집니다")
+                        else:
+                            self.time_warp_timer = 180
+                            self._show_msg("시간 왜곡! 3초 동안 타이머가 느려집니다")
                     elif obj.kind == "미니맵":
                         self.minimap_timer = 240
                         self._show_msg("미니맵 활성화! 4초 동안 지형과 열쇠 위치가 표시됩니다")
@@ -946,9 +955,9 @@ class GameScene:
 
         fog = pygame.Surface((PLAY_ZONE_W, HEIGHT - 45), pygame.SRCALPHA)
         if self.difficulty == "Easy":
-            fog_alpha = 130
+            fog_alpha = 140
         elif self.difficulty == "Normal":
-            fog_alpha = 150
+            fog_alpha = 170
         else:
             fog_alpha = 240
         fog.fill((10, 15, 25, fog_alpha))
@@ -1047,7 +1056,18 @@ class GameScene:
 
         if self.need_key:
             draw_key(surface, panel_x + 20, 272, 0.65)
-            surface.blit(FONT_TINY.render("탈출 열", True, COLORS["열쇠"]), (panel_x + 36, 265))
+            if self.need_key:
+                if not self.player.has_key:
+                    draw_key(surface, panel_x + 20, 272, 0.65)
+                    surface.blit(
+                        FONT_TINY.render("열쇠 필요", True, COLORS["열쇠"]),
+                        (panel_x + 36, 265)
+                    )
+                else:
+                    surface.blit(
+                        FONT_TINY.render("열쇠 확보 완료", True, COLORS["출구"]),
+                        (panel_x + 12, 265)
+                    )
 
         self.draw_minimap(surface, panel_x + 12, 285)
 
