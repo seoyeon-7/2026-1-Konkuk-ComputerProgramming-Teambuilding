@@ -38,8 +38,8 @@ if SOUND_ENABLED:
     except Exception as e:
         print(f"BGM 파일을 건너뜁니다: bgm.mp3 ({e})")
 
-screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-WIDTH, HEIGHT = screen.get_size()
+WIDTH, HEIGHT = 800, 800
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("출구 없는 밤 : 생존 프로토콜 (듀얼 불렛 에디션)")
 clock = pygame.time.Clock()
 
@@ -71,15 +71,15 @@ COLORS = {
     "빨강": (220, 50, 50), "주황": (255, 165, 0), "노랑": (255, 220, 0),
     "초록": (34, 160, 34), "파랑": (30, 80, 220), "남색": (0, 0, 128),
     "보라": (128, 0, 180), "핑크": (255, 100, 180), "민트": (62, 180, 137),
-    "차콜": (54, 69, 79), "화이트": (255, 255, 255), "블랙": (10, 10, 10),
+    "차콜": (54, 69, 79), "화이트": (255, 255, 255), "블랙": (9, 17, 13),
     "그레이": (150, 150, 150), "연그레이": (220, 220, 220),
     "벽": (50, 65, 85), "바닥": (240, 244, 248), "출구": (46, 204, 113),
     "열쇠": (241, 196, 15), "HUD_BG": (20, 20, 30), "패널": (25, 25, 35),
-    "아이템_원": (52, 152, 219), "함정_원": (231, 76, 60)
+    "아이템_원": (52, 152, 219), "함정_원": (231, 76, 60), "메인": (94, 161, 109)
 }
 
 try:    #"malgungothic"
-    FONT_BIG = pygame.font.SysFont("AppleGothic", 42, bold=True)
+    FONT_BIG = pygame.font.SysFont("AppleGothic", 55, bold=True)
     FONT_MID = pygame.font.SysFont("AppleGothic", 22, bold=True)
     FONT_SMALL = pygame.font.SysFont("AppleGothic", 15, bold=True)
     FONT_TINY = pygame.font.SysFont("AppleGothic", 13, bold=True)
@@ -249,7 +249,7 @@ class Button:
             return
         col = tuple(min(255, c+30) for c in self.bg) if self.hovered else self.bg
         pygame.draw.rect(surface, col, self.rect, border_radius=8)
-        pygame.draw.rect(surface, COLORS["블랙"], self.rect, 2, border_radius=8)
+        pygame.draw.rect(surface, COLORS["메인"], self.rect, 2, border_radius=8)
         s = FONT_MID.render(self.text, True, self.fg)
         surface.blit(s, s.get_rect(center=self.rect.center))
 
@@ -855,7 +855,7 @@ class GameScene:
             return
 
         pygame.draw.rect(surface, (12, 12, 20), (x, y, w, h), border_radius=8)
-        pygame.draw.rect(surface, COLORS["연그레이"], (x, y, w, h), 1, border_radius=8)
+        pygame.draw.rect(surface, COLORS["연그레이"], (x, y, w, h), 1, border_radius=12)
 
         remain_sec = max(1, (self.minimap_timer + 59) // 60)
         title = FONT_TINY.render(f"MINI MAP {remain_sec}s", True, COLORS["노랑"])
@@ -1133,20 +1133,20 @@ class GameController:
 
         if self.state == "START":
             start_buttons = [
-                (240, "미로 진입", (46, 204, 113), "DIFFICULTY"),
-                (320, "커스터마이즈", (52, 152, 219), "CUSTOM"),
-                (400, "게임 설명", (155, 89, 182), "HELP")
+                (310, "미로 진입", (9, 17, 13), "DIFFICULTY"),
+                (390, "커스터마이즈", (9, 17, 13), "CUSTOM"),
+                (470, "게임 설명", (9, 17, 13), "HELP")
             ]
             for y, label, bg, target in start_buttons:
-                self.buttons["START"].append(Button(WIDTH // 2 - 100, y, 220, 55, label, bg, COLORS["화이트"], lambda t=target: self._set(t)))
+                self.buttons["START"].append(Button(WIDTH // 2 - 110, y, 220, 50, label, bg, COLORS["메인"], lambda t=target: self._set(t)))
 
 
         elif self.state == "CUSTOM":
-            preview_panel = pygame.Rect(40, 120, 260, 420)
+            preview_panel = pygame.Rect(240, 120, 260, 420)
             self.custom_preview_rect = preview_panel
-            shape_y = 200
+            shape_y = 280
             for i, sh in enumerate(SHAPES):
-                x = 360 + (i % 2) * 160
+                x = 410 + (i % 2) * 160
                 y = shape_y + (i // 2) * 70
                 def make_shape_callback(s):
                     return lambda: setattr(self, "character_shape", s)
@@ -1154,15 +1154,15 @@ class GameController:
                     Button(
                         x, y, 110, 40,
                         sh,
-                        (60, 65, 80),
-                        COLORS["화이트"],
+                        (9, 17, 13),
+                        COLORS["메인"],
                         make_shape_callback(sh)
                     )
                 )
             color_list = [("빨강", COLORS["빨강"]), ("주황", COLORS["주황"]), ("노랑", COLORS["노랑"]), ("초록", COLORS["초록"]), ("파랑", COLORS["파랑"]), ("보라", COLORS["보라"]), ("핑크", COLORS["핑크"]), ("민트", COLORS["민트"]), ("차콜", COLORS["차콜"]), ("블랙", COLORS["블랙"])]
             for i, (name, col) in enumerate(color_list):
-                x = 360 + (i % 5) * 60
-                y = 350 + (i // 5) * 60
+                x = 400 + (i % 5) * 60
+                y = 430 + (i // 5) * 60
                 def make_color_callback(c):
                     return lambda: setattr(self, "character_color", c)
                 self.buttons["CUSTOM"].append(
@@ -1170,16 +1170,16 @@ class GameController:
                         x, y, 50, 50,
                         "",
                         col,
-                        COLORS["화이트"],
+                        COLORS["메인"],
                         make_color_callback(col)
                     )
                 )
             self.buttons["CUSTOM"].append(
                 Button(
-                    260, 600, 220, 50,
+                    WIDTH//2-110, 680, 220, 50,
                     "저장하기",
                     (46, 204, 113),
-                    COLORS["화이트"],
+                    COLORS["메인"],
                     lambda: self._set("START")
                 )
             )
@@ -1347,17 +1347,19 @@ class GameController:
             draw_text_lines(surface, [(t, COLORS["민트"] if i == 0 else COLORS["화이트"]) for i, t in enumerate(trap_lines)], right_x, 395, 21)
 
         if self.state == "START":
-            txt = FONT_BIG.render("< 출구 없는 밤 : 생존 프로토콜 >", True, COLORS["노랑"])
-            surface.blit(txt, txt.get_rect(center=(WIDTH//2, 140)))
+            txt1 = FONT_BIG.render("출구 없는 밤", True, COLORS["메인"])
+            surface.blit(txt1, txt1.get_rect(center=(WIDTH//2, 160)))
+            txt2 = FONT_MID.render(": 생존 프로토콜", True, COLORS["메인"])
+            surface.blit(txt2, txt2.get_rect(center=(WIDTH // 2, 220)))
 
 
         elif self.state == "CUSTOM":
-            surface.fill((18, 18, 28))
-            preview = pygame.Rect(40, 120, 260, 420)
-            pygame.draw.rect(surface, (30, 30, 45), preview, border_radius=12)
-            pygame.draw.rect(surface, COLORS["연그레이"], preview, 2, border_radius=12)
-            title = FONT_BIG.render("커스터마이즈", True, COLORS["노랑"])
-            surface.blit(title, title.get_rect(center=(WIDTH // 2, 70)))
+            surface.fill((9, 17, 13))
+            preview = pygame.Rect(90, HEIGHT//2-210, 260, 420)
+            pygame.draw.rect(surface, (9, 17, 13), preview, border_radius=12)
+            pygame.draw.rect(surface, COLORS["메인"], preview, 2, border_radius=12)
+            title = FONT_BIG.render("커스터마이즈", True, COLORS["메인"])
+            surface.blit(title, title.get_rect(center=(WIDTH // 2, 110)))
             draw_shape(
                 surface,
                 self.character_shape,
@@ -1366,14 +1368,14 @@ class GameController:
                 preview.centery,
                 40
             )
-            info1 = FONT_SMALL.render(f"선택된 모양: {self.character_shape}", True, COLORS["화이트"])
-            info2 = FONT_SMALL.render("선택된 색", True, self.character_color)
+            info1 = FONT_SMALL.render(f"선택된 모양: {self.character_shape}", True, COLORS["메인"])
+            info2 = FONT_SMALL.render("선택된 색:", True, self.character_color)
             surface.blit(info1, (preview.x + 20, preview.y + 320))
             surface.blit(info2, (preview.x + 20, preview.y + 350))
-            panel = pygame.Rect(330, 120, 330, 420)
-            pygame.draw.rect(surface, (25, 25, 38), panel, border_radius=12)
-            pygame.draw.rect(surface, COLORS["연그레이"], panel, 2, border_radius=12)
-            label = FONT_MID.render("모양 / 색 선택", True, COLORS["민트"])
+            panel = pygame.Rect(380, HEIGHT//2-210, 330, 420)
+            pygame.draw.rect(surface, (9, 17, 13), panel, border_radius=12)
+            pygame.draw.rect(surface, COLORS["메인"], panel, 2, border_radius=12)
+            label = FONT_MID.render("모양 / 색 선택", True, COLORS["메인"])
             surface.blit(label, (panel.x + 20, panel.y + 20))
 
         elif self.state == "DIFFICULTY":
@@ -1433,7 +1435,7 @@ class GameController:
             panel_rect = pygame.Rect(0, 0, 300, 190)
             panel_rect.center = (WIDTH // 2, 300)
             pygame.draw.rect(surface, (10, 10, 20), panel_rect, border_radius=14)
-            pygame.draw.rect(surface, COLORS["연그레이"], panel_rect, 2, border_radius=14)
+            pygame.draw.rect(surface, COLORS["메인"], panel_rect, 2, border_radius=14)
 
             result_info = [
                 (df_text, COLORS["화이트"]),
