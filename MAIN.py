@@ -520,7 +520,7 @@ class GameScene:
         self.oy = 0
         self.msg = ""
         self.msg_timer = 0
-        self.base_vision = 120
+        self.base_vision = 140
         self.result = None
         self.flash_timer = 0
         self.shake_intensity = 0
@@ -940,19 +940,19 @@ class GameScene:
             vision = max(15, vision * 0.15)
 
         if self.difficulty == "Easy":
-            vision = int(vision * 2.5)
+            vision = int(vision)
         elif self.difficulty == "Hard":
-            vision = int(vision * 1.15)
+            vision = int(vision)
 
         px_screen, py_screen = self.player.x - ox, self.player.y - oy
 
         fog = pygame.Surface((PLAY_ZONE_W, HEIGHT - 45), pygame.SRCALPHA)
         if self.difficulty == "Easy":
-            fog_alpha = 140
+            fog_alpha = 220
         elif self.difficulty == "Normal":
-            fog_alpha = 170
+            fog_alpha = 230
         else:
-            fog_alpha = 240
+            fog_alpha = 242
         fog.fill((10, 15, 25, fog_alpha))
 
         pygame.draw.circle(fog, (0, 0, 0, 0), (int(px_screen), int(py_screen - 45)), int(vision))
