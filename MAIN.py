@@ -67,7 +67,7 @@ LOSE_IMAGE = load_start_image(LOSE_IMAGE_FILE, (WIDTH, HEIGHT))
 NORMAL_IMAGE = load_start_image(NORMAL_IMAGE_FILE, (WIDTH, HEIGHT))
 
 
-SAVE_FILE = "maze_save.json"
+SAVE_FILE = os.path.join(BASE_DIR, "maze_save.json")
 
 COLORS = {
     "빨강": (220, 50, 50), "주황": (255, 165, 0), "노랑": (255, 220, 0),
@@ -114,24 +114,33 @@ DIFFICULTY = {
 }
 
 def load_game_data():
-    loaded_data = None
-    if os.path.exists(SAVE_FILE):
-        try:
-            with open(SAVE_FILE, 'r', encoding='utf-8') as f:
-                loaded_data = json.load(f)
-        except:
-            pass
-
     default_unlocked = {}
     default_best_time = {}
+
     for diff in ["Easy", "Normal", "Hard"]:
         for stage in range(1, 6):
             key = f"{diff}_{stage}"
             default_unlocked[key] = True if stage == 1 else False
             default_best_time[key] = None
 
-    if loaded_data is None:
-        return {"unlocked": default_unlocked, "best_time": default_best_time}
+    default_data = {
+        "unlocked": default_unlocked,
+        "best_time": default_best_time
+    }
+
+    if not os.path.exists(SAVE_FILE):
+        with open(SAVE_FILE, "w", encoding="utf-8") as f:
+            json.dump(default_data, f, ensure_ascii=False, indent=4)
+        return default_data
+
+    try:
+        with open(SAVE_FILE, "r", encoding="utf-8") as f:
+            loaded_data = json.load(f)
+    except:
+        with open(SAVE_FILE, "w", encoding="utf-8") as f:
+            json.dump(default_data, f, ensure_ascii=False, indent=4)
+        return default_data
+
     if "unlocked" not in loaded_data:
         loaded_data["unlocked"] = default_unlocked
     if "best_time" not in loaded_data:
@@ -520,7 +529,7 @@ class GameScene:
         self.oy = 0
         self.msg = ""
         self.msg_timer = 0
-        self.base_vision = 120
+        self.base_vision = 140
         self.result = None
         self.flash_timer = 0
         self.shake_intensity = 0
@@ -940,19 +949,19 @@ class GameScene:
             vision = max(15, vision * 0.15)
 
         if self.difficulty == "Easy":
-            vision = int(vision * 2.5)
+            vision = int(vision)
         elif self.difficulty == "Hard":
-            vision = int(vision * 1.15)
+            vision = int(vision)
 
         px_screen, py_screen = self.player.x - ox, self.player.y - oy
 
         fog = pygame.Surface((PLAY_ZONE_W, HEIGHT - 45), pygame.SRCALPHA)
         if self.difficulty == "Easy":
-            fog_alpha = 140
+            fog_alpha = 220
         elif self.difficulty == "Normal":
-            fog_alpha = 170
+            fog_alpha = 230
         else:
-            fog_alpha = 240
+            fog_alpha = 242
         fog.fill((10, 15, 25, fog_alpha))
 
         pygame.draw.circle(fog, (0, 0, 0, 0), (int(px_screen), int(py_screen - 45)), int(vision))
@@ -1338,7 +1347,6 @@ class GameController:
 
             item_lines = ["아이템", "- 적 제거 / 적 정지", "- 속도 증가", "- 시야 확대", "- 시간 왜곡", "- 미니맵"]
             trap_lines = ["함정", "- 생명 감소", "- 이동 속도 감소", "- 시야 제한", "- 상하좌우 반전"]
-
             draw_text_lines(surface, [(t, COLORS["메인"] if i == 0 else COLORS["화이트"]) for i, t in enumerate(item_lines)], right_x, 295, 21)
             draw_text_lines(surface, [(t, COLORS["메인"] if i == 0 else COLORS["화이트"]) for i, t in enumerate(trap_lines)], right_x, 465, 21)
 
